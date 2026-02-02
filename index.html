@@ -1240,6 +1240,11 @@
                     this.switchView('view-login');
                 }
 
+                clearListeners() {
+                    this.unsubscribers.forEach(unsub => unsub && unsub());
+                    this.unsubscribers = [];
+                }
+
                 // --- STUDENT LOGIC ---
                 initStudent() {
                     this.clearListeners(); // Ensure clean slate
