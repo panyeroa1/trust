@@ -1,19 +1,15 @@
 {
-    "id": "/index.html",
-    "name": "Success Class",
-    "short_name": "Success",
+    "name": "Succes Class",
+    "short_name": "Succes",
     "start_url": "./",
     "display": "standalone",
-    "orientation": "portrait",
     "background_color": "#ffffff",
     "theme_color": "#3b82f6",
     "icons": [
         {
             "src": "pwa_icon.png",
             "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
+            "type": "image/png"
         }
-    ],
-    "description": "Real-time AI Translation and Hybrid Learning Platform"
+    ]
 }
