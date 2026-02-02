@@ -105,16 +105,19 @@ export class SpeakManager {
         if (btn) {
             console.log('Updating button for approved request'); // Debug log
             
-            // Change button appearance
+            // Make button fully green with better styling
             btn.classList.remove('bg-gradient-to-br', 'from-blue-500', 'to-indigo-600');
-            btn.classList.add('bg-green-500', 'animate-pulse', 'shadow-lg', 'shadow-green-500/50');
+            btn.classList.add('bg-green-500', 'animate-pulse', 'shadow-lg', 'shadow-green-500/50', 'border-2', 'border-green-600');
             btn.innerHTML = '<i class="fa-solid fa-microphone-lines text-lg"></i>';
             btn.title = "Click to start speaking";
+            
+            // Add audio visualizer container
+            this.addAudioVisualizer();
             
             // Enable microphone for student
             btn.onclick = async () => {
                 console.log('Student clicked to start speaking'); // Debug log
-                this.app.showToast("🎙️ Microphone activated! Speak now.", "success");
+                this.app.showToast("🎙️ Requesting microphone access...", "info");
                 
                 try {
                     // Request microphone permissions first
@@ -127,31 +130,122 @@ export class SpeakManager {
                     });
                     console.log('Microphone access granted'); // Debug log
                     
-                    // Start the microphone using teacher's toggleMic logic
-                    await this.app.startDeepgram();
-                    
-                    // Change button to show it's recording
+                    // Show visual feedback that we're listening
+                    this.startVisualizer();
                     btn.classList.remove('animate-pulse', 'bg-green-500');
-                    btn.classList.add('bg-red-500');
+                    btn.classList.add('bg-red-500', 'border-red-600');
                     btn.innerHTML = '<i class="fa-solid fa-microphone-slash text-lg"></i>';
                     btn.title = "Click to stop speaking";
+                    
+                    // Start broadcasting to Firebase (simpler approach)
+                    this.startStudentBroadcast(stream);
                     
                     // When stopping mic, reset the button
                     btn.onclick = () => {
                         console.log('Student clicked to stop speaking'); // Debug log
-                        this.app.stopDeepgram();
+                        this.stopStudentBroadcast();
                         this.resetRequestButton();
                     };
                     
                 } catch (error) {
                     console.error('Microphone access denied:', error);
-                    this.app.showToast("Microphone access denied. Please allow microphone access.", "error");
+                    this.app.showToast("❌ Microphone access denied. Please allow microphone access.", "error");
                     this.resetRequestButton();
                 }
             };
         } else {
             console.error('Speak request button not found'); // Debug log
         }
+    }
+
+    addAudioVisualizer() {
+        // Remove existing visualizer if any
+        const existing = document.getElementById('student-audio-visualizer');
+        if (existing) existing.remove();
+        
+        // Create visualizer container
+        const visualizer = document.createElement('div');
+        visualizer.id = 'student-audio-visualizer';
+        visualizer.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 flex gap-1 bg-black/50 rounded-full px-4 py-2 hidden';
+        visualizer.innerHTML = `
+            <div class="w-1 h-4 bg-green-400 rounded-full animate-pulse"></div>
+            <div class="w-1 h-4 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
+            <div class="w-1 h-4 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+            <div class="w-1 h-4 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.3s"></div>
+            <div class="w-1 h-4 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+        `;
+        document.body.appendChild(visualizer);
+    }
+
+    startVisualizer() {
+        const visualizer = document.getElementById('student-audio-visualizer');
+        if (visualizer) {
+            visualizer.classList.remove('hidden');
+            // Make bars more active
+            const bars = visualizer.querySelectorAll('div');
+            bars.forEach(bar => {
+                bar.classList.add('animate-bounce');
+                bar.style.height = '20px';
+            });
+        }
+    }
+
+    stopVisualizer() {
+        const visualizer = document.getElementById('student-audio-visualizer');
+        if (visualizer) {
+            visualizer.classList.add('hidden');
+        }
+    }
+
+    startStudentBroadcast(stream) {
+        // Simple broadcast using Web Speech API as fallback
+        this.mediaRecorder = new MediaRecorder(stream);
+        this.mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                // Convert to text and send to Firebase
+                this.processAudioChunk(event.data);
+            }
+        };
+        this.mediaRecorder.start(1000); // Send chunks every second
+        
+        this.app.showToast("🎙️ Broadcasting...", "success");
+    }
+
+    stopStudentBroadcast() {
+        if (this.mediaRecorder) {
+            this.mediaRecorder.stop();
+            this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+        this.stopVisualizer();
+        this.app.showToast("🔇 Broadcasting stopped", "info");
+    }
+
+    async processAudioChunk(audioBlob) {
+        // For now, we'll use a simple transcription service or send as audio
+        // This is a placeholder - you might want to integrate with a speech-to-text service
+        try {
+            const text = await this.transcribeAudio(audioBlob);
+            if (text && text.trim()) {
+                // Send to Firebase messages
+                const { ref, push } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
+                await push(ref(this.app.db, `chats/${this.app.state.room}/messages`), {
+                    text: text,
+                    lang: this.app.state.lang,
+                    senderName: this.app.state.name,
+                    senderId: this.app.state.name,
+                    timestamp: Date.now()
+                });
+            }
+        } catch (error) {
+            console.error('Failed to process audio:', error);
+        }
+    }
+
+    async transcribeAudio(audioBlob) {
+        // Placeholder for transcription service
+        // You could integrate with Google Speech API, Deepgram, or other service
+        // For now, return a placeholder
+        return "Student speaking (transcription placeholder)";
     }
 
     resetRequestButton() {

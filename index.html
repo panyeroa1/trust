@@ -1577,13 +1577,15 @@
                 }
 
                 renderQuestion(text, original, sender) {
-                    console.log('Rendering question:', { text, original, sender }); // Debug log
+                    console.log('renderQuestion called with:', { text, original, sender }); // Debug log
                     
                     const list = document.getElementById('teacher-questions');
                     if (!list) {
                         console.error('teacher-questions element not found'); // Debug log
                         return;
                     }
+                    
+                    console.log('Adding question to list, current children:', list.children.length); // Debug log
                     
                     const card = document.createElement('div');
                     card.className = "bg-white border border-blue-100 p-3 rounded-xl shadow-sm animate-slide-up cursor-pointer hover:border-blue-300 transition-colors";
@@ -1595,13 +1597,39 @@
                     <p class="text-sm font-semibold text-gray-800 leading-snug">${text}</p>
                     <p class="text-xs text-gray-400 italic mt-1 truncate">${original}</p>
                     `;
+                    
+                    // Add click handler to expand/collapse
+                    card.onclick = () => {
+                        const originalText = card.querySelector('.text-xs');
+                        if (originalText.style.display === 'none') {
+                            originalText.style.display = 'block';
+                        } else {
+                            originalText.style.display = 'none';
+                        }
+                    };
+                    
                     list.prepend(card);
+                    console.log('Question added to list, new children count:', list.children.length); // Debug log
 
                     const count = document.getElementById('question-count');
                     if (count) {
-                        count.innerText = parseInt(count.innerText || '0') + 1;
+                        const currentCount = parseInt(count.innerText || '0');
+                        count.innerText = currentCount + 1;
+                        console.log('Question count updated to:', currentCount + 1); // Debug log
                     } else {
                         console.error('question-count element not found'); // Debug log
+                    }
+                    
+                    // Make sure questions tab is visible
+                    const questionsPanel = document.getElementById('panel-questions');
+                    if (questionsPanel && questionsPanel.classList.contains('hidden')) {
+                        console.log('Questions panel was hidden, making it visible'); // Debug log
+                        questionsPanel.classList.remove('hidden');
+                        // Update tab buttons
+                        const questionsBtn = document.querySelector('[onclick="App.toggleTab(\'questions\')"]');
+                        const speakBtn = document.querySelector('[onclick="App.toggleTab(\'speak\')"]');
+                        if (questionsBtn) questionsBtn.classList.add('text-blue-600');
+                        if (speakBtn) speakBtn.classList.remove('text-blue-600');
                     }
                 }
 
@@ -1782,21 +1810,27 @@
                 }
 
                 toggleTab(tab) {
+                    console.log('ToggleTab called with:', tab); // Debug log
+                    
                     const questionsPanel = document.getElementById('panel-questions');
                     const speakPanel = document.getElementById('panel-speak');
                     const questionsBtn = document.querySelector('[onclick="App.toggleTab(\'questions\')"]');
                     const speakBtn = document.querySelector('[onclick="App.toggleTab(\'speak\')"]');
 
+                    console.log('Elements found:', { questionsPanel, speakPanel, questionsBtn, speakBtn }); // Debug log
+
                     if (tab === 'questions') {
-                        questionsPanel.classList.remove('hidden');
-                        speakPanel.classList.add('hidden');
-                        questionsBtn.classList.add('text-blue-600');
-                        speakBtn.classList.remove('text-blue-600');
+                        if (questionsPanel) questionsPanel.classList.remove('hidden');
+                        if (speakPanel) speakPanel.classList.add('hidden');
+                        if (questionsBtn) questionsBtn.classList.add('text-blue-600');
+                        if (speakBtn) speakBtn.classList.remove('text-blue-600');
+                        console.log('Switched to questions tab'); // Debug log
                     } else if (tab === 'speak') {
-                        questionsPanel.classList.add('hidden');
-                        speakPanel.classList.remove('hidden');
-                        questionsBtn.classList.remove('text-blue-600');
-                        speakBtn.classList.add('text-blue-600');
+                        if (questionsPanel) questionsPanel.classList.add('hidden');
+                        if (speakPanel) speakPanel.classList.remove('hidden');
+                        if (questionsBtn) questionsBtn.classList.remove('text-blue-600');
+                        if (speakBtn) speakBtn.classList.add('text-blue-600');
+                        console.log('Switched to speak requests tab'); // Debug log
                     }
                 }
             }
