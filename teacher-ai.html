@@ -99,10 +99,75 @@
                 transform: translateY(0);
             }
         }
+
+        .visualizer-bar {
+            width: 4px;
+            background-color: #3b82f6;
+            border-radius: 4px;
+            animation: quiet 1s ease-in-out infinite;
+        }
+
+        .speaking .visualizer-bar {
+            animation: talking 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes talking {
+            0% {
+                height: 8px;
+            }
+
+            100% {
+                height: 24px;
+            }
+        }
+
+        @keyframes quiet {
+            0% {
+                height: 4px;
+            }
+
+            50% {
+                height: 4px;
+            }
+
+            100% {
+                height: 4px;
+            }
+        }
+
+        .speaking .visualizer-bar:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .speaking .visualizer-bar:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .speaking .visualizer-bar:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        /* Force Landscape Overlay */
+        #landscape-overlay {
+            display: none;
+        }
+
+        @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+            #landscape-overlay {
+                display: flex;
+            }
+        }
     </style>
 </head>
 
 <body class="bg-slate-50 h-[100dvh] w-full flex flex-col overflow-hidden">
+    <!-- Landscape Warning Overlay -->
+    <div id="landscape-overlay"
+        class="fixed inset-0 z-[100] bg-slate-900 text-white flex-col items-center justify-center text-center p-10 animate-fade-in">
+        <i class="fa-solid fa-rotate-left text-6xl mb-6 animate-pulse"></i>
+        <h2 class="text-3xl font-black uppercase tracking-widest mb-4">Please Rotate Device</h2>
+        <p class="text-lg text-gray-400 font-medium">This experience is optimized for Landscape mode.</p>
+    </div>
 
     <!-- Header -->
     <header class="sticky-header h-16 shrink-0 px-6 flex justify-between items-center z-30">
@@ -138,9 +203,9 @@
         </div>
     </header>
 
-    <main class="flex-1 p-4 md:p-6 lg:p-8 w-full flex flex-col min-h-0">
+    <main class="flex-1 p-2 md:p-4 lg:p-6 w-full flex flex-col min-h-0">
         <div
-            class="glass-apple rounded-[24px] md:rounded-[32px] p-6 md:p-10 flex-1 flex flex-col animate-slide-up w-full max-w-4xl mx-auto overflow-hidden shadow-2xl">
+            class="glass-apple rounded-[24px] md:rounded-[32px] p-6 md:p-10 flex-1 flex flex-col animate-slide-up w-full max-w-full mx-auto overflow-hidden shadow-2xl">
             <div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
                 <div class="mb-8 md:mb-12">
                     <div class="flex items-center gap-3 mb-2">
@@ -154,13 +219,17 @@
                         sentence-by-sentence to your class with human-like delivery and natural pacing.</p>
                 </div>
 
-                <div class="flex-1 w-full max-w-3xl mx-auto px-6 py-8 md:py-10 flex flex-col items-center">
+                <div class="flex-1 w-full max-w-5xl mx-auto px-6 py-8 md:py-10 flex flex-col items-center">
 
-                    <!-- Connection Status -->
+                    <!-- Connection Status & Visualizer -->
                     <div id="status-badge"
-                        class="hidden mb-6 px-4 py-2 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 animate-pulse-slow">
-                        <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
-                        LIVE BROADCAST ACTIVE
+                        class="mb-6 md:mb-8 px-5 py-2.5 bg-white text-gray-600 rounded-full text-xs font-bold uppercase tracking-widest border border-gray-200 flex items-center gap-3 shadow-sm transition-all duration-300">
+                        <div class="flex items-center gap-1 h-5 visualizer opacity-50 transition-opacity">
+                            <span class="visualizer-bar h-1 bg-blue-500"></span>
+                            <span class="visualizer-bar h-1 bg-blue-500"></span>
+                            <span class="visualizer-bar h-1 bg-blue-500"></span>
+                        </div>
+                        <span id="status-text">Connected to Classroom</span>
                     </div>
 
                     <div class="w-full space-y-6 md:space-y-10 flex-1">
@@ -486,37 +555,67 @@ Be specific, accurate, and clear.`;
                 const broadcastBtn = document.getElementById('broadcast-btn');
                 const stopBtn = document.getElementById('stop-btn');
                 const statusBadge = document.getElementById('status-badge');
+                const statusText = document.getElementById('status-text');
                 const input = document.getElementById('topic-input');
+                const visualizer = statusBadge.querySelector('.visualizer');
 
-                // Reset all
-                startBtn.classList.add('hidden');
-                broadcastBtn.classList.add('hidden');
-                stopBtn.classList.add('hidden');
-                statusBadge.classList.add('hidden');
-                input.disabled = false;
-                startBtn.disabled = false;
-                startBtn.classList.remove('opacity-50');
+                // Helper to set badge style
+                const setBadge = (mode) => {
+                    if (mode === 'live') {
+                        statusBadge.classList.replace('border-gray-200', 'border-emerald-200');
+                        statusBadge.classList.replace('bg-white', 'bg-emerald-50');
+                        statusBadge.classList.replace('text-gray-600', 'text-emerald-700');
+                        visualizer.classList.add('speaking');
+                        visualizer.classList.remove('opacity-50');
+                        statusText.textContent = "Live Broadcast Active";
+                    } else {
+                        statusBadge.classList.replace('border-emerald-200', 'border-gray-200');
+                        statusBadge.classList.replace('bg-emerald-50', 'bg-white');
+                        statusBadge.classList.replace('text-emerald-700', 'text-gray-600');
+                        visualizer.classList.remove('speaking');
+                        visualizer.classList.add('opacity-50');
+                        statusText.textContent = "Connected to Classroom";
+                    }
+                };
 
                 switch (state) {
                     case 'generating':
                         startBtn.classList.remove('hidden');
+                        broadcastBtn.classList.add('hidden');
+                        stopBtn.classList.add('hidden');
                         startBtn.disabled = true;
-                        startBtn.classList.add('opacity-50');
-                        startBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> GENERATING...';
+                        startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        startBtn.innerHTML = '<div class="relative flex h-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 md:py-5 text-white transition-all"><i class="fa-solid fa-circle-notch fa-spin text-xl"></i><span class="text-sm md:text-base font-black tracking-widest uppercase">Planning...</span></div>';
                         input.disabled = true;
+                        setBadge('idle');
                         break;
+
                     case 'ready':
+                        startBtn.classList.add('hidden');
                         broadcastBtn.classList.remove('hidden');
-                        input.disabled = true; // Lock input while ready
-                        break;
-                    case 'broadcasting':
-                        stopBtn.classList.remove('hidden');
-                        statusBadge.classList.remove('hidden');
+                        stopBtn.classList.add('hidden');
                         input.disabled = true;
+                        this.log("Review correct? Click BROADCAST to start.", "info");
+                        setBadge('idle');
                         break;
+
+                    case 'broadcasting':
+                        startBtn.classList.add('hidden');
+                        broadcastBtn.classList.add('hidden');
+                        stopBtn.classList.remove('hidden');
+                        input.disabled = true;
+                        setBadge('live');
+                        break;
+
                     default: // idle
                         startBtn.classList.remove('hidden');
-                        startBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> GENERATE';
+                        broadcastBtn.classList.add('hidden');
+                        stopBtn.classList.add('hidden');
+                        startBtn.disabled = false;
+                        startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        startBtn.innerHTML = '<div class="relative flex h-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 md:py-5 text-white transition-all group-hover:bg-opacity-90"><i class="fa-solid fa-wand-magic-sparkles text-xl drop-shadow-sm"></i><span class="text-sm md:text-base font-black tracking-widest uppercase text-white drop-shadow-sm">Generate Lesson</span></div>';
+                        input.disabled = false;
+                        setBadge('idle');
                 }
             },
 
