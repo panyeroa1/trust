@@ -7,6 +7,7 @@
     <title>AI Teacher Generator - Succes Class</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -113,18 +114,34 @@
                 </a>
                 <h1 class="font-black text-gray-900 tracking-tight text-sm uppercase">AI Teacher</h1>
             </div>
-            <div class="flex items-center gap-3">
-                <div id="status-badge"
-                    class="hidden flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#0071e3] text-[10px] font-black uppercase tracking-wider animate-pulse">
-                    <i class="fa-solid fa-brain"></i> Teaching
+            <div class="flex items-center gap-2 md:gap-3">
+                <button onclick="Generator.copyRoomId()" title="Copy Room ID"
+                    class="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all active:scale-95">
+                    <i class="fa-regular fa-copy text-sm"></i>
+                </button>
+                <div class="relative group">
+                    <button onclick="Generator.toggleQR()" title="Show QR Code"
+                        class="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all active:scale-95">
+                        <i class="fa-solid fa-qrcode text-sm"></i>
+                    </button>
+                    <!-- QR Dropdown -->
+                    <div id="qr-dropdown"
+                        class="absolute right-0 top-14 w-64 bg-white rounded-2xl shadow-apple border border-gray-100 p-6 hidden animate-fade-in z-50 flex flex-col items-center">
+                        <div id="qrcode" class="mb-4 bg-white p-2 rounded-xl shadow-sm border border-gray-100"></div>
+                        <button onclick="Generator.downloadQR()"
+                            class="flex items-center gap-2 text-[10px] font-black text-[#0071e3] hover:text-[#0077ed] uppercase tracking-widest transition-colors py-2 px-4 rounded-full hover:bg-blue-50">
+                            <i class="fa-solid fa-download"></i> Download QR
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
+        </div>
     </header>
 
-    <main class="flex-1 p-6 md:p-12 max-w-full lg:max-w-screen-xl mx-auto w-full flex flex-col">
+    <main class="flex-1 p-6 md:p-12 w-full flex flex-col h-full">
         <div
-            class="glass-apple rounded-[32px] md:rounded-[48px] p-8 md:p-12 flex-1 flex flex-col animate-slide-up h-full">
+            class="glass-apple rounded-[32px] md:rounded-[48px] p-8 md:p-12 flex-1 flex flex-col animate-slide-up h-full w-full max-w-3xl mx-auto">
             <div class="mb-8 md:mb-12">
                 <div class="flex items-center gap-3 mb-2">
                     <div
@@ -137,8 +154,16 @@
                     sentence-by-sentence to your class with human-like delivery and natural pacing.</p>
             </div>
 
-            <div class="space-y-6 md:space-y-10 flex-1">
-                <div class="max-w-3xl">
+            <div class="flex-1 w-full max-w-3xl mx-auto px-6 py-8 md:py-10 flex flex-col items-center">
+
+                <!-- Connection Status -->
+                <div id="status-badge"
+                    class="hidden mb-6 px-4 py-2 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 animate-pulse-slow">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+                    LIVE BROADCAST ACTIVE
+                </div>
+
+                <div class="w-full space-y-6 md:space-y-10 flex-1">
                     <label
                         class="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Subject /
                         Topic</label>
@@ -173,13 +198,35 @@
                 </div>
 
                 <div class="flex gap-4 max-w-3xl">
-                    <button id="start-btn" onclick="Generator.start()" title="Start Lesson"
-                        class="flex-1 btn-apple bg-[#0071e3] hover:bg-[#0077ed] text-white py-4 md:py-5 shadow-lg shadow-blue-500/10 flex items-center justify-center gap-3 text-lg md:text-xl">
-                        <i class="fa-solid fa-play"></i> START
+                    <button id="start-btn" onclick="Generator.start()" title="Generate Lesson"
+                        class="flex-1 group relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 p-[2px] shadow-lg shadow-blue-500/30 transition-all hover:scale-[1.02] hover:shadow-blue-500/50 active:scale-[0.98]">
+                        <div
+                            class="relative flex h-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 md:py-5 text-white transition-all group-hover:bg-opacity-90">
+                            <i class="fa-solid fa-wand-magic-sparkles text-xl drop-shadow-sm"></i>
+                            <span
+                                class="text-sm md:text-base font-black tracking-widest uppercase text-white drop-shadow-sm">Generate
+                                Lesson</span>
+                        </div>
                     </button>
+
+                    <button id="broadcast-btn" onclick="Generator.startBroadcast()" title="Start Broadcast"
+                        class="hidden flex-1 group relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 p-[2px] shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] hover:shadow-emerald-500/50 active:scale-[0.98]">
+                        <div
+                            class="relative flex h-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-4 md:py-5 text-white transition-all group-hover:bg-opacity-90">
+                            <i class="fa-solid fa-tower-broadcast text-xl drop-shadow-sm animate-pulse"></i>
+                            <span
+                                class="text-sm md:text-base font-black tracking-widest uppercase text-white drop-shadow-sm">Start
+                                Broadcast</span>
+                        </div>
+                    </button>
+
                     <button id="stop-btn" onclick="Generator.stop()" title="Stop Lesson"
-                        class="hidden btn-apple bg-[#ff3b30] hover:bg-[#ff453a] text-white px-8 py-4 md:py-5 shadow-lg shadow-red-500/10 transition-all text-lg md:text-xl">
-                        STOP
+                        class="hidden group relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-500 to-red-600 p-[2px] shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02] hover:shadow-red-500/50 active:scale-[0.98]">
+                        <div
+                            class="relative flex h-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-red-500 to-red-600 px-10 py-4 md:py-5 text-white transition-all">
+                            <span
+                                class="text-sm md:text-base font-black tracking-widest uppercase text-white drop-shadow-sm">STOP</span>
+                        </div>
                     </button>
                 </div>
 
@@ -223,6 +270,48 @@
                     return;
                 }
                 window.Generator = this;
+
+                // Initialize QR Code
+                setTimeout(() => {
+                    this.generateQR();
+                }, 500);
+            },
+
+            generateQR() {
+                const studentUrl = window.location.href.replace('teacher-ai.html', 'index.html') + '?room=' + this.session.room;
+                const qrContainer = document.getElementById("qrcode");
+                qrContainer.innerHTML = ""; // Clear existing
+                new QRCode(qrContainer, {
+                    text: studentUrl,
+                    width: 160,
+                    height: 160,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            },
+
+            toggleQR() {
+                const dropdown = document.getElementById('qr-dropdown');
+                dropdown.classList.toggle('hidden');
+            },
+
+            downloadQR() {
+                const qrCanvas = document.querySelector('#qrcode canvas');
+                if (!qrCanvas) return;
+
+                const link = document.createElement('a');
+                link.download = `succes-class-qr-${this.session.room}.png`;
+                link.href = qrCanvas.toDataURL();
+                link.click();
+            },
+
+            copyRoomId() {
+                navigator.clipboard.writeText(this.session.room).then(() => {
+                    this.log(`Room ID ${this.session.room} copied to clipboard!`, "success");
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
             },
 
             async start() {
@@ -231,26 +320,28 @@
                 if (!topic) return;
 
                 this.isActive = true;
-                this.updateUI(true);
-                this.log("Starting generation for: " + topic, "info");
+                this.updateUI('generating');
+                this.log("Generating lesson content for: " + topic, "info");
 
                 try {
                     const response = await this.callAI(topic);
                     const ssmlBlock = response.choices[0].message.content;
-
-                    // Split into sentences using a simple regex that respects SSML tags
-                    // We look for patterns like . or ! or ? that are NOT followed by a tag closing but might be followed by whitespace
-                    // A better way is to split by broad sentence boundaries and re-wrap
                     const sentences = this.splitSSML(ssmlBlock);
 
-                    this.log(`Generated ${sentences.length} sentences. Starting broadcast...`, "success");
                     this.queue = sentences;
-                    this.runLoop();
+                    this.log(`Generation complete! ${sentences.length} sentences ready.`, "success");
+                    this.updateUI('ready');
 
                 } catch (e) {
                     this.log("Error: " + e.message, "error");
                     this.stop();
                 }
+            },
+
+            startBroadcast() {
+                this.log("Starting live broadcast...", "success");
+                this.updateUI('broadcasting');
+                this.runLoop();
             },
 
             setTopic(topic) {
@@ -261,9 +352,9 @@
 
             stop() {
                 this.isActive = false;
-                if (this.interval) clearInterval(this.interval);
+                if (this.interval) clearTimeout(this.interval);
                 this.queue = [];
-                this.updateUI(false);
+                this.updateUI('idle');
                 this.log("Lesson stopped.", "warning");
             },
 
@@ -356,7 +447,10 @@ Be specific, accurate, and clear.`;
             runLoop() {
                 if (this.interval) clearInterval(this.interval);
 
-                this.interval = setInterval(() => {
+                // Random delay between 3000ms and 4000ms
+                const delay = Math.floor(Math.random() * 1000) + 3000;
+
+                this.interval = setTimeout(() => {
                     if (!this.isActive || this.queue.length === 0) {
                         this.stop();
                         return;
@@ -364,7 +458,10 @@ Be specific, accurate, and clear.`;
 
                     const sentence = this.queue.shift();
                     this.broadcast(sentence);
-                }, 3000);
+
+                    // Recursive call for next sentence
+                    this.runLoop();
+                }, delay);
             },
 
             broadcast(ssml) {
@@ -383,12 +480,43 @@ Be specific, accurate, and clear.`;
                 this.log(`Sent: ${text.substring(0, 50)}...`, "info");
             },
 
-            updateUI(active) {
-                document.getElementById('start-btn').disabled = active;
-                document.getElementById('start-btn').classList.toggle('opacity-50', active);
-                document.getElementById('stop-btn').classList.toggle('hidden', !active);
-                document.getElementById('status-badge').classList.toggle('hidden', !active);
-                document.getElementById('topic-input').disabled = active;
+            updateUI(state) {
+                const startBtn = document.getElementById('start-btn');
+                const broadcastBtn = document.getElementById('broadcast-btn');
+                const stopBtn = document.getElementById('stop-btn');
+                const statusBadge = document.getElementById('status-badge');
+                const input = document.getElementById('topic-input');
+
+                // Reset all
+                startBtn.classList.add('hidden');
+                broadcastBtn.classList.add('hidden');
+                stopBtn.classList.add('hidden');
+                statusBadge.classList.add('hidden');
+                input.disabled = false;
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50');
+
+                switch (state) {
+                    case 'generating':
+                        startBtn.classList.remove('hidden');
+                        startBtn.disabled = true;
+                        startBtn.classList.add('opacity-50');
+                        startBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> GENERATING...';
+                        input.disabled = true;
+                        break;
+                    case 'ready':
+                        broadcastBtn.classList.remove('hidden');
+                        input.disabled = true; // Lock input while ready
+                        break;
+                    case 'broadcasting':
+                        stopBtn.classList.remove('hidden');
+                        statusBadge.classList.remove('hidden');
+                        input.disabled = true;
+                        break;
+                    default: // idle
+                        startBtn.classList.remove('hidden');
+                        startBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> GENERATE';
+                }
             },
 
             log(msg, type) {
