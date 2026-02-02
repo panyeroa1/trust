@@ -977,19 +977,9 @@
 
                 registerServiceWorker() {
                     if ('serviceWorker' in navigator) {
-                        const swCode = `
-                        const CACHE_NAME = 'orbit-v1';
-                        const ASSETS = ['./', './index.html', './pwa_icon.png'];
-                        self.addEventListener('install', (e) => {
-                            e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
-                        });
-                        self.addEventListener('fetch', (e) => {
-                            e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
-                        });
-                    `;
-                        const blob = new Blob([swCode], { type: 'application/javascript' });
-                        const url = URL.createObjectURL(blob);
-                        navigator.serviceWorker.register(url).catch(err => console.log('SW failed', err));
+                        navigator.serviceWorker.register('./sw.js')
+                            .then(() => console.log('SW Registered'))
+                            .catch(err => console.log('SW failed', err));
                     }
                 }
 
@@ -1533,7 +1523,7 @@
                     this.dgSocket.on(LiveTranscriptionEvents.Open, () => {
                         this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
                         this.mediaRecorder.ondataavailable = (e) => {
-                            if (e.data.size > 0 && this.dgSocket.getReadyState() === 1) {
+                            if (e.data.size > 0 && this.dgSocket && this.dgSocket.getReadyState() === 1) {
                                 this.dgSocket.send(e.data);
                             }
                         };

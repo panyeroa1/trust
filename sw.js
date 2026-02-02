@@ -1,20 +1,10 @@
-const CACHE_NAME = 'orbit-v3';
-const ASSETS = ['./', './index.html', './pwa_icon.png'];
+const CACHE_NAME = 'orbit-v1';
+const ASSETS = ['./', './index.html', './pwa_icon.png', './manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
-    self.skipWaiting();
     e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
 });
 
-self.addEventListener('activate', (e) => {
-    e.waitUntil(clients.claim());
-});
-
 self.addEventListener('fetch', (e) => {
-    // Network First, fallback to Cache (Development Mode)
-    e.respondWith(
-        fetch(e.request)
-            .then(res => res)
-            .catch(() => caches.match(e.request))
-    );
+    e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
 });
