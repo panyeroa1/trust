@@ -1523,6 +1523,9 @@
                     this.dgSocket.on(LiveTranscriptionEvents.Open, () => {
                         this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
                         this.mediaRecorder.ondataavailable = (e) => {
+                            // Software Gate: If audio is playing (TTS), ignore mic input to prevent self-hearing/echo.
+                            if (this.state.isAudioPlaying) return;
+
                             if (e.data.size > 0 && this.dgSocket && this.dgSocket.getReadyState() === 1) {
                                 this.dgSocket.send(e.data);
                             }
