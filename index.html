@@ -1378,15 +1378,35 @@
                     updateUI(sIcon, sBtn);
                     updateUI(tIcon, tBtn);
 
-                    if (this.state.isTTSActive) {
+                    // If TTS is being turned OFF, stop current audio
+                    if (!this.state.isTTSActive) {
+                        this.stopCurrentAudio();
+                        this.showToast("Voice Output Muted", "info");
+                    } else {
                         this.processAudioQueue();
                         this.showToast("Voice Output Enabled", "success");
-                    } else {
-                        this.showToast("Voice Output Muted", "info");
                     }
                 }
 
+                stopCurrentAudio() {
+                    // Stop any currently playing audio
+                    if (this.currentAudio && !this.currentAudio.paused) {
+                        this.currentAudio.pause();
+                        this.currentAudio.currentTime = 0;
+                    }
+                    this.currentAudio = null;
+                    this.state.isAudioPlaying = false;
+                    
+                    // Clear the audio queue when muted
+                    this.state.audioQueue = [];
+                }
+
                 queueAudio(text, gender, options = {}) {
+                    // Only queue audio if TTS is active
+                    if (!this.state.isTTSActive) {
+                        console.log('TTS is muted, not queuing audio:', text);
+                        return;
+                    }
                     this.state.audioQueue.push({ text, gender, ...options });
                     if (!this.state.isAudioPlaying) this.processAudioQueue();
                 }

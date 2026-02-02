@@ -112,26 +112,42 @@ export class SpeakManager {
             btn.title = "Click to start speaking";
             
             // Enable microphone for student
-            btn.onclick = () => {
+            btn.onclick = async () => {
                 console.log('Student clicked to start speaking'); // Debug log
                 this.app.showToast("🎙️ Microphone activated! Speak now.", "success");
                 
-                // Start the microphone
-                this.app.toggleMic();
-                
-                // Change button to show it's recording
-                btn.classList.remove('animate-pulse');
-                btn.classList.add('bg-red-500');
-                btn.innerHTML = '<i class="fa-solid fa-microphone-slash text-lg"></i>';
-                btn.title = "Click to stop speaking";
-                
-                // When stopping mic, reset the button
-                const originalToggleMic = this.app.toggleMic.bind(this.app);
-                this.app.toggleMic = () => {
-                    originalToggleMic();
+                try {
+                    // Request microphone permissions first
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+                    console.log('Microphone access granted'); // Debug log
+                    
+                    // Start the microphone using teacher's toggleMic logic
+                    await this.app.startDeepgram();
+                    
+                    // Change button to show it's recording
+                    btn.classList.remove('animate-pulse', 'bg-green-500');
+                    btn.classList.add('bg-red-500');
+                    btn.innerHTML = '<i class="fa-solid fa-microphone-slash text-lg"></i>';
+                    btn.title = "Click to stop speaking";
+                    
+                    // When stopping mic, reset the button
+                    btn.onclick = () => {
+                        console.log('Student clicked to stop speaking'); // Debug log
+                        this.app.stopDeepgram();
+                        this.resetRequestButton();
+                    };
+                    
+                } catch (error) {
+                    console.error('Microphone access denied:', error);
+                    this.app.showToast("Microphone access denied. Please allow microphone access.", "error");
                     this.resetRequestButton();
-                    this.app.toggleMic = originalToggleMic; // Restore original function
-                };
+                }
             };
         } else {
             console.error('Speak request button not found'); // Debug log
