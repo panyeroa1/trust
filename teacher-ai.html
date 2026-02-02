@@ -424,6 +424,7 @@
                 this.isActive = false;
                 if (this.interval) clearTimeout(this.interval);
                 this.queue = [];
+                this.releaseKeepAlive();
                 this.updateUI('idle');
                 this.log("Lesson stopped.", "warning");
             },
@@ -499,6 +500,34 @@ Be specific, accurate, and clear.`;
                 return res.json();
             },
 
+            initKeepAlive() {
+                // 1. Wake Lock
+                if ('wakeLock' in navigator) {
+                    navigator.wakeLock.request('screen')
+                        .then(lock => { this.wakeLock = lock; })
+                        .catch(e => console.log('Wake Lock Error:', e));
+                }
+
+                // 2. Silent Audio Hack for Background Execution
+                if (!this.silentAudio) {
+                    this.silentAudio = new Audio();
+                    // 1s of silence base64
+                    this.silentAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+                    this.silentAudio.loop = true;
+                    this.silentAudio.volume = 0; // Silent
+                }
+                this.silentAudio.play().catch(() => { });
+            },
+
+            releaseKeepAlive() {
+                if (this.wakeLock) {
+                    this.wakeLock.release().then(() => { this.wakeLock = null; });
+                }
+                if (this.silentAudio) {
+                    this.silentAudio.pause();
+                }
+            },
+
             splitSSML(ssml) {
                 // Remove outer <speak> tags if present to split content
                 let content = ssml.replace(/<\/?speak>/g, '').trim();
@@ -519,6 +548,9 @@ Be specific, accurate, and clear.`;
 
                 // Random delay between 3000ms and 4000ms
                 const delay = Math.floor(Math.random() * 1000) + 3000;
+
+                // Start Keep-Alive (WakeLock + Audio)
+                this.initKeepAlive();
 
                 this.interval = setTimeout(() => {
                     if (!this.isActive || this.queue.length === 0) {
