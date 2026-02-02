@@ -50,18 +50,23 @@ export class SpeakManager {
     }
 
     async listenForApprovals() {
+        console.log('Starting to listen for approvals for:', this.app.state.name); // Debug log
         const { ref, onValue } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
         onValue(ref(this.db, this.requestsRef), (snapshot) => {
             const data = snapshot.val();
+            console.log('Approval data received:', data); // Debug log
             if (!data) return;
 
             Object.entries(data).forEach(([key, req]) => {
+                console.log('Checking request:', req, 'for user:', this.app.state.name); // Debug log
                 if (req.name === this.app.state.name) {
                     if (req.status === 'approved') {
+                        console.log('Request approved for:', this.app.state.name); // Debug log
                         this.onApproved();
                         // Clean up approved request
                         this.removeRequest(key);
                     } else if (req.status === 'denied') {
+                        console.log('Request denied for:', this.app.state.name); // Debug log
                         this.onDenied();
                         // Clean up denied request
                         this.removeRequest(key);
@@ -86,20 +91,50 @@ export class SpeakManager {
     }
 
     onApproved() {
-        this.app.showToast("Teacher approved! You can speak now.", "success");
+        console.log('onApproved called for:', this.app.state.name); // Debug log
+        
+        // Show multiple notifications to ensure student sees it
+        this.app.showToast("🎤 Teacher approved! You can now speak.", "success");
+        
+        // Also show an alert as backup
+        setTimeout(() => {
+            alert("Teacher approved your request! Click the green microphone button to start speaking.");
+        }, 500);
+        
         const btn = document.getElementById('speak-request-btn');
         if (btn) {
+            console.log('Updating button for approved request'); // Debug log
+            
+            // Change button appearance
             btn.classList.remove('bg-gradient-to-br', 'from-blue-500', 'to-indigo-600');
-            btn.classList.add('bg-green-500', 'animate-pulse');
+            btn.classList.add('bg-green-500', 'animate-pulse', 'shadow-lg', 'shadow-green-500/50');
             btn.innerHTML = '<i class="fa-solid fa-microphone-lines text-lg"></i>';
+            btn.title = "Click to start speaking";
+            
             // Enable microphone for student
             btn.onclick = () => {
+                console.log('Student clicked to start speaking'); // Debug log
+                this.app.showToast("🎙️ Microphone activated! Speak now.", "success");
+                
+                // Start the microphone
                 this.app.toggleMic();
-                // Reset button after stopping mic
-                setTimeout(() => {
+                
+                // Change button to show it's recording
+                btn.classList.remove('animate-pulse');
+                btn.classList.add('bg-red-500');
+                btn.innerHTML = '<i class="fa-solid fa-microphone-slash text-lg"></i>';
+                btn.title = "Click to stop speaking";
+                
+                // When stopping mic, reset the button
+                const originalToggleMic = this.app.toggleMic.bind(this.app);
+                this.app.toggleMic = () => {
+                    originalToggleMic();
                     this.resetRequestButton();
-                }, 1000);
+                    this.app.toggleMic = originalToggleMic; // Restore original function
+                };
             };
+        } else {
+            console.error('Speak request button not found'); // Debug log
         }
     }
 

@@ -1524,14 +1524,20 @@
 
                     // Questions Listener
                     const qRef = ref(this.db, `chats/${this.state.room}/questions`);
+                    console.log('Teacher listening for questions on path:', `chats/${this.state.room}/questions`); // Debug log
+                    console.log('Teacher room:', this.state.room); // Debug log
+                    
                     const unsubQ = onChildAdded(qRef, async (snap) => {
                         if (this.state.role !== 'teacher') return;
                         const q = snap.val();
                         if (!q) return;
 
-                        console.log('Received question:', q); // Debug log
+                        console.log('Teacher received question:', q); // Debug log
+                        console.log('Question key:', snap.key); // Debug log
 
                         const trans = await this.translateText(q.text, q.lang, this.state.lang);
+                        console.log('Translated question:', trans); // Debug log
+                        
                         this.renderQuestion(trans, q.text, q.senderName);
 
                         // Update question count
@@ -1697,13 +1703,19 @@
                     if (!val) return;
 
                     console.log('Sending question:', val); // Debug log
+                    console.log('Student info:', { name: this.state.name, room: this.state.room, lang: this.state.lang }); // Debug log
 
-                    push(ref(this.db, `chats/${this.state.room}/questions`), {
+                    const questionData = {
                         text: val,
                         lang: this.state.lang,
                         senderName: this.state.name,
                         timestamp: Date.now()
-                    }).then(() => {
+                    };
+                    
+                    console.log('Question data to send:', questionData); // Debug log
+                    console.log('Firebase path:', `chats/${this.state.room}/questions`); // Debug log
+
+                    push(ref(this.db, `chats/${this.state.room}/questions`), questionData).then(() => {
                         console.log('Question sent successfully'); // Debug log
                         document.getElementById('q-input').value = '';
                         this.toggleModal('question');
