@@ -106,9 +106,14 @@ export class SpeakManager {
                     <p class="text-sm font-bold text-gray-900">${req.name}</p>
                     <p class="text-[10px] text-gray-400 uppercase font-black">Wants to speak</p>
                 </div>
-                <button onclick="App.speakManager.approveRequest('${key}')" class="bg-green-500 hover:bg-green-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95">
-                    APPROVE
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="App.speakManager.denyRequest('${key}')" class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95">
+                        DENY
+                    </button>
+                    <button onclick="App.speakManager.approveRequest('${key}')" class="bg-green-500 hover:bg-green-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95">
+                        APPROVE
+                    </button>
+                </div>
             </div>
         `).join('');
     }
@@ -123,6 +128,19 @@ export class SpeakManager {
         } catch (e) {
             console.error("Approval failed", e);
             this.app.showToast("Failed to approve", "error");
+        }
+    }
+
+    async denyRequest(requestId) {
+        try {
+            const { ref, update } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
+            await update(ref(this.db, `${this.requestsRef}/${requestId}`), {
+                status: 'denied'
+            });
+            this.app.showToast("Request denied", "info");
+        } catch (e) {
+            console.error("Denial failed", e);
+            this.app.showToast("Failed to deny", "error");
         }
     }
 }
