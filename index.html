@@ -36,9 +36,9 @@
                         brand: {
                             50: '#f0f9ff',
                             100: '#e0f2fe',
-                            500: '#0ea5e9', // Sky Blue
-                            600: '#0284c7',
-                            900: '#0c4a6e',
+                            500: '#0071e3', // Apple Blue
+                            600: '#0077ed',
+                            900: '#1d1d1f',
                         },
                         accent: {
                             500: '#8b5cf6', // Violet
@@ -65,129 +65,127 @@
     </script>
 
     <style>
-        /* --- Premium Base Styles --- */
+        /* --- Apple-style Refinements --- */
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-blur: blur(12px);
-            --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
-            --shadow-hard: 0 20px 40px -10px rgba(0, 0, 0, 0.12);
+            --glass-bg: rgba(255, 255, 255, 0.88);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-blur: blur(16px);
+            --shadow-apple: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+            --shadow-lift: 0 20px 60px -15px rgba(0, 0, 0, 0.1);
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f3f4f6 0%, #e0f2fe 100%);
-            height: 100vh;
+            font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #fbfbfd;
+            height: 100dvh;
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
-            color: #1f2937;
+            color: #1d1d1f;
+            letter-spacing: -0.022em;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1,
+        h2,
+        h3,
+        .font-black {
+            font-family: "SF Pro Display", "SF Pro Text", -apple-system, sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* Sticky Header Logic */
+        header.sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.8);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* Bottom Spacer for PWA/Mobile */
+        .bottom-lift {
+            padding-bottom: calc(25px + env(safe-area-inset-bottom));
         }
 
         /* Input Reset & Styling */
-        .input-glass {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        .input-apple {
+            background: #f5f5f7;
+            border: none;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            /* Prevents iOS zoom */
         }
 
-        .input-glass:focus {
+        .input-apple:focus {
             background: #ffffff;
-            border-color: #0ea5e9;
-            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.01);
+            box-shadow: 0 0 0 3px rgba(0, 125, 250, 0.1);
             outline: none;
         }
 
         /* Buttons */
-        .btn-modern {
-            transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
+        .btn-apple {
+            border-radius: 14px;
+            font-weight: 510;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        .btn-modern:active {
-            transform: scale(0.97);
-        }
-
-        /* Scrollbar */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+        .btn-apple:active {
+            transform: scale(0.96);
+            opacity: 0.8;
         }
 
         /* Utilities */
-        .glass-panel {
+        .glass-apple,
+        .glass-modern {
             background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow-soft);
+            backdrop-filter: var(--glass-blur);
+            border: 0.5px solid var(--glass-border);
+            box-shadow: var(--shadow-apple);
         }
 
         .message-bubble {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            transition: transform 0.2s;
-            transform-origin: bottom left;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border-radius: 18px;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .mic-active-ring {
-            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-        }
-
-        @keyframes pulse-ring {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            }
-
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
-            }
-
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-            }
-        }
-
-        /* Animations */
+        /* View State Management */
         .view-transition {
             transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .view-hidden {
-            opacity: 0;
-            pointer-events: none;
-            position: absolute;
-            inset: 0;
-            transform: scale(0.98);
-            z-index: -1;
+            display: none !important;
         }
 
         .view-active {
-            opacity: 1;
-            pointer-events: auto;
-            position: relative;
-            transform: scale(1);
-            z-index: 10;
+            display: flex !important;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Responsive Layout Optimization */
+        @media (min-width: 1024px) {
+            #app {
+                border-radius: 20px;
+                height: 85vh;
+                margin: auto;
+                box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        @media (max-width: 1023px) {
+            #app {
+                width: 100%;
+                height: 100%;
+                max-width: none;
+                border-radius: 0;
+            }
         }
     </style>
 </head>
@@ -199,8 +197,8 @@
         class="fixed top-4 left-0 right-0 z-50 pointer-events-none flex flex-col items-center gap-2 p-4"></div>
 
     <!-- MAIN APP CONTAINER -->
-    <main id="app"
-        class="relative w-full h-full max-w-lg mx-auto bg-white/50 shadow-2xl overflow-hidden md:rounded-2xl md:my-8 md:h-[calc(100vh-4rem)] md:border md:border-white/50 backdrop-blur-3xl">
+    <div id="app"
+        class="relative w-screen h-screen bg-[#fbfbfd] flex flex-col overflow-hidden max-w-full lg:max-w-screen-xl mx-auto shadow-2xl">
 
         <!-- ================= VIEW: LOGIN ================= -->
         <section id="view-login" class="view-active w-full h-full flex flex-col p-8 transition-all duration-500">
@@ -221,28 +219,32 @@
             <!-- Login Form (Student) -->
             <div id="form-student" class="w-full space-y-5 mb-4 animate-slide-up" style="animation-delay: 0.1s;">
                 <div class="group">
-                    <label class="block text-sm font-semibold text-gray-500 mb-1.5 ml-1">Conversation Code</label>
+                    <label
+                        class="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Conversation
+                        Code</label>
                     <div class="relative flex gap-2">
-                        <input id="login-code" type="text" placeholder="Enter conversation code"
-                            class="input-glass flex-1 px-4 py-3.5 rounded-lg text-base font-medium text-gray-800 placeholder-gray-400 bg-gray-50/50 border-gray-200 focus:bg-white transition-all">
-                        <div
-                            class="w-12 flex items-center justify-center bg-gray-100 rounded-lg text-gray-500 text-2xl">
+                        <input id="login-code" type="text" placeholder="Enter session code"
+                            class="input-apple flex-1 px-4 py-3.5 tracking-tight transition-all">
+                        <div class="w-12 flex items-center justify-center bg-gray-100 rounded-xl text-gray-400 text-xl">
                             <i class="fa-solid fa-qrcode"></i>
                         </div>
                     </div>
                 </div>
 
                 <div class="group">
-                    <label class="block text-sm font-semibold text-gray-500 mb-1.5 ml-1">Username</label>
-                    <input id="login-name" type="text" placeholder="Enter Username"
-                        class="input-glass w-full px-4 py-3.5 rounded-lg text-base font-medium text-gray-800 placeholder-gray-400 bg-gray-50/50 border-gray-200 focus:bg-white">
+                    <label
+                        class="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Username</label>
+                    <input id="login-name" type="text" placeholder="Your name"
+                        class="input-apple w-full px-4 py-3.5 tracking-tight">
                 </div>
 
                 <div class="group">
-                    <label class="block text-sm font-semibold text-gray-500 mb-1.5 ml-1">Receiving Language</label>
+                    <label
+                        class="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Communication
+                        Language</label>
                     <div class="relative">
-                        <select id="login-lang" title="Select your receiving language"
-                            class="input-glass w-full px-4 py-3.5 rounded-lg text-base font-medium text-gray-800 appearance-none bg-gray-50/50 border-gray-200 focus:bg-white pr-10 truncate">
+                        <select id="login-lang" title="Select your language"
+                            class="input-apple w-full px-4 py-3.5 appearance-none pr-10 truncate tracking-tight">
                             <!-- Populated dynamically -->
                         </select>
                         <i
@@ -250,8 +252,8 @@
                     </div>
                 </div>
 
-                <button onclick="App.handleLogin()"
-                    class="btn-modern w-full bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-semibold py-3.5 rounded-lg shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 mt-4 text-lg">
+                <button onclick="App.handleLogin()" title="Join Conversation"
+                    class="btn-apple w-full bg-[#0071e3] hover:bg-[#0077ed] text-white py-4 shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 mt-4 text-lg">
                     <span>Join Conversation</span>
                 </button>
             </div>
@@ -259,24 +261,24 @@
             <!-- Teacher Login Form (Hidden by default) -->
             <div id="form-teacher" class="hidden w-full space-y-5 mb-4 animate-slide-up">
                 <div class="group">
-                    <label class="block text-sm font-semibold text-gray-500 mb-1.5 ml-1"
-                        for="teacher-email">Email</label>
+                    <label class="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1"
+                        for="teacher-email">Admin Email</label>
                     <input id="teacher-email" type="email" value="teacher@adahconnect.com" placeholder="Email"
-                        title="Teacher Email"
-                        class="input-glass w-full px-4 py-3.5 rounded-lg text-base font-medium text-gray-800 placeholder-gray-400 bg-gray-50/50 border-gray-200 focus:bg-white">
+                        title="Teacher Email" class="input-apple w-full px-4 py-3.5 tracking-tight">
                 </div>
                 <div class="group">
-                    <label class="block text-sm font-semibold text-gray-500 mb-1.5 ml-1"
+                    <label class="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1"
                         for="teacher-pw">Password</label>
                     <input id="teacher-pw" type="password" value="teacher456321" placeholder="Password"
-                        title="Teacher Password"
-                        class="input-glass w-full px-4 py-3.5 rounded-lg text-base font-medium text-gray-800 placeholder-gray-400 bg-gray-50/50 border-gray-200 focus:bg-white">
+                        title="Teacher Password" class="input-apple w-full px-4 py-3.5 tracking-tight">
                 </div>
                 <div class="group">
-                    <label class="block text-sm font-semibold text-gray-500 mb-1.5 ml-1">Language</label>
+                    <label
+                        class="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Instruction
+                        Language</label>
                     <div class="relative">
-                        <select id="teacher-lang" title="Select your instruction language"
-                            class="input-glass w-full px-4 py-3.5 rounded-lg text-base font-medium text-gray-800 appearance-none bg-gray-50/50 border-gray-200 focus:bg-white pr-10 truncate">
+                        <select id="teacher-lang" title="Select instruction language"
+                            class="input-apple w-full px-4 py-3.5 appearance-none pr-10 truncate tracking-tight">
                             <!-- Populated dynamically -->
                         </select>
                         <i
@@ -284,90 +286,105 @@
                     </div>
                 </div>
 
-                <button onclick="App.handleTeacherLogin()"
-                    class="btn-modern w-full bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold py-3.5 rounded-lg shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 mt-4 text-lg">
+                <button onclick="App.handleTeacherLogin()" title="Login to Teacher Portal"
+                    class="btn-apple w-full bg-[#34c759] hover:bg-[#28ad4d] text-white py-4 shadow-lg shadow-green-500/10 flex items-center justify-center gap-2 mt-4 text-lg">
                     <span>Login & Start</span>
                 </button>
-                <button onclick="App.toggleTeacherMode(false)"
-                    class="w-full py-2 text-sm font-semibold text-gray-400 hover:text-gray-600">
-                    Cancel
+                <button onclick="App.toggleTeacherMode(false)" title="Cancel Login"
+                    class="w-full py-2 text-xs font-bold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-colors">
+                    Back to Student Login
                 </button>
             </div>
 
 
             <!-- Footer / Toggle -->
-            <div id="login-footer" class="text-center animate-slide-up mt-auto pt-4" style="animation-delay: 0.2s;">
-                <button onclick="App.toggleTeacherMode(true)"
-                    class="w-full py-3.5 rounded-lg font-semibold text-white bg-[#22c55e] hover:bg-[#16a34a] shadow-lg shadow-green-500/20 transition-all flex items-center justify-center gap-2">
-                    <span>Teacher</span>
+            <div id="login-footer" class="text-center animate-slide-up mt-auto bottom-lift"
+                style="animation-delay: 0.2s;">
+                <button onclick="App.toggleTeacherMode(true)" title="Switch to Teacher Portal"
+                    class="btn-apple w-full py-4 text-white bg-[#34c759] hover:bg-[#28ad4d] shadow-lg shadow-green-500/10 flex items-center justify-center gap-2">
+                    <span>Switch to Teacher Portal</span>
                 </button>
             </div>
         </section>
 
         <!-- ================= VIEW: TEACHER LOBBY (QR) ================= -->
-        <section id="view-lobby" class="view-hidden w-full h-full flex flex-col bg-white text-center p-8">
-            <div class="flex-1 flex flex-col items-center justify-center space-y-8 animate-slide-up">
-                <h2 class="text-2xl font-bold text-gray-900">Classroom Ready</h2>
+        <section id="view-lobby" class="view-hidden w-full h-full flex flex-col bg-[#fbfbfd]">
+            <div class="flex-1 flex flex-col items-center justify-center p-8 space-y-10 animate-slide-up">
+                <div class="text-center space-y-2">
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Classroom Ready</h2>
+                    <p class="text-sm text-gray-500 font-medium">Students can join using the code below</p>
+                </div>
 
-                <div class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 relative">
-                    <div class="absolute inset-0 bg-blue-500/5 rounded-3xl blur-xl -z-10"></div>
-                    <!-- QR Placeholder -->
+                <div class="relative group">
                     <div
-                        class="w-48 h-48 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 text-6xl shadow-inner mb-4 border border-blue-100">
-                        <i class="fa-solid fa-qrcode"></i>
+                        class="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full scale-150 opacity-50 group-hover:opacity-80 transition-opacity">
                     </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Room Code</p>
-                        <p id="lobby-code" class="text-4xl font-mono font-black text-blue-600 tracking-widest">----</p>
+                    <div
+                        class="relative glass-apple p-10 rounded-[40px] border border-white flex flex-col items-center">
+                        <!-- QR Placeholder -->
+                        <div
+                            class="w-48 h-48 bg-gray-50 rounded-3xl flex items-center justify-center text-blue-600 text-6xl shadow-inner mb-6 border border-gray-100">
+                            <i class="fa-solid fa-qrcode"></i>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Room Code
+                            </p>
+                            <p id="lobby-code" class="text-5xl font-mono font-black text-[#0071e3] tracking-wider">----
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <p class="text-gray-500 max-w-xs mx-auto text-sm">Share this code with students to let them join the
-                    conversation.</p>
+                <div class="flex flex-col items-center gap-2">
+                    <p class="text-[13px] text-gray-400 font-medium max-w-[240px] text-center">Share the code or scan
+                        the QR to begin the session.</p>
+                </div>
             </div>
 
-            <button onclick="App.startSession()"
-                class="btn-modern w-full bg-[#22c55e] hover:bg-[#16a34a] text-white font-bold py-4 rounded-xl shadow-lg shadow-green-500/20 flex items-center justify-center gap-3 animate-slide-up">
-                <span>Start Session</span>
-                <i class="fa-solid fa-play"></i>
-            </button>
+            <div class="p-8 bottom-lift">
+                <button onclick="App.startSession()" title="Start Classroom Session"
+                    class="btn-apple w-full bg-[#34c759] hover:bg-[#28ad4d] text-white py-4 shadow-lg shadow-green-500/10 flex items-center justify-center gap-3 text-lg">
+                    <span>Start Session</span>
+                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                </button>
+            </div>
         </section>
 
         <!-- ================= VIEW: STUDENT ================= -->
         <section id="view-student" class="view-hidden w-full h-full flex flex-col bg-white">
             <!-- Navbar -->
             <header
-                class="h-16 px-6 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100">
+                class="h-16 px-6 flex items-center justify-between bg-white/80 backdrop-blur-xl -webkit-backdrop-blur-xl sticky top-0 z-30 border-b border-gray-100">
                 <div class="flex items-center gap-3">
                     <button onclick="App.logout()" title="Logout"
-                        class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors">
+                        class="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors">
                         <i class="fa-solid fa-arrow-left text-sm"></i>
                     </button>
                     <div>
                         <h2 id="student-name-display"
-                            class="font-bold text-gray-900 leading-tight text-sm text-truncate max-w-[120px]">Student
+                            class="font-black text-gray-900 leading-tight text-sm text-truncate max-w-[120px]">Student
                         </h2>
                         <div class="flex items-center gap-1">
                             <span class="text-[9px] text-gray-400 font-bold uppercase tracking-tight">Receiving:</span>
                             <span id="student-lang-badge"
-                                class="text-[10px] font-black uppercase text-blue-600">EN</span>
+                                class="text-[10px] font-black uppercase text-[#0071e3]">EN</span>
                         </div>
                     </div>
                 </div>
                 <!-- Status & Audio Toggle -->
                 <div class="flex items-center gap-4">
                     <button onclick="App.toggleModal('history')" title="View History"
-                        class="text-gray-400 hover:text-blue-500 transition-colors">
+                        class="text-gray-400 hover:text-[#0071e3] transition-colors">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                     </button>
                     <button id="tts-btn" onclick="App.toggleTTS()" title="Toggle Voice Output"
-                        class="text-gray-400 hover:text-blue-500 transition-colors">
+                        class="text-gray-400 hover:text-[#0071e3] transition-colors">
                         <i id="tts-icon" class="fa-solid fa-volume-xmark"></i>
                     </button>
-                    <span class="relative flex h-3 w-3">
+                    <span class="relative flex h-2.5 w-2.5">
                         <span
                             class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
                     </span>
                 </div>
             </header>
@@ -388,29 +405,29 @@
             </div>
 
             <!-- Controls -->
-            <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-transparent z-20">
+            <div class="px-6 pb-6 bottom-lift mt-auto">
                 <div class="flex items-center justify-between gap-4">
                     <!-- Reactions -->
                     <div class="flex gap-3">
-                        <button onclick="App.sendReaction('👍')"
-                            class="btn-modern w-12 h-12 rounded-full bg-white border border-gray-200 shadow-sm text-xl flex items-center justify-center hover:bg-gray-50 hover:scale-110">👍</button>
-                        <button onclick="App.sendReaction('❤️')"
-                            class="btn-modern w-12 h-12 rounded-full bg-white border border-gray-200 shadow-sm text-xl flex items-center justify-center hover:bg-gray-50 hover:scale-110">❤️</button>
+                        <button onclick="App.sendReaction('👍')" title="Thumbs Up"
+                            class="btn-apple w-12 h-12 bg-white border border-gray-100 shadow-sm text-xl flex items-center justify-center hover:bg-gray-50">👍</button>
+                        <button onclick="App.sendReaction('❤️')" title="Heart"
+                            class="btn-apple w-12 h-12 bg-white border border-gray-100 shadow-sm text-xl flex items-center justify-center hover:bg-gray-50">❤️</button>
                     </div>
 
                     <!-- Right Group: Speak + Hand -->
                     <div class="flex items-center gap-3">
                         <!-- Speak Request Button -->
                         <button id="speak-request-btn" onclick="App.speakManager.requestToSpeak()"
-                            title="Request to Speak"
-                            class="btn-modern h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/20 flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+                            title="Request to Speak" title="Request to Speak"
+                            class="btn-apple h-12 w-12 bg-[#0071e3] text-white shadow-lg shadow-blue-500/10 flex items-center justify-center">
                             <i class="fa-solid fa-microphone text-lg"></i>
                         </button>
 
                         <!-- Ask Question FAB -->
-                        <button onclick="App.toggleModal('question')"
-                            class="btn-modern h-12 px-6 rounded-full bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-semibold shadow-lg shadow-blue-500/20 flex items-center gap-2">
-                            <i class="fa-solid fa-hand"></i>
+                        <button onclick="App.toggleModal('question')" title="Raise Hand"
+                            class="btn-apple h-12 px-6 bg-white border border-gray-200 text-gray-900 font-semibold shadow-sm flex items-center gap-2">
+                            <i class="fa-solid fa-hand text-orange-400"></i>
                             <span>Raise Hand</span>
                         </button>
                     </div>
@@ -419,45 +436,44 @@
         </section>
 
         <!-- ================= VIEW: TEACHER (DASHBOARD) ================= -->
-        <section id="view-teacher" class="view-hidden w-full h-full flex flex-col bg-slate-50">
+        <section id="view-teacher" class="view-hidden w-full h-full flex flex-col bg-[#fbfbfd]">
             <!-- Header -->
-            <header
-                class="h-16 px-6 bg-white border-b border-gray-200 flex justify-between items-center shadow-sm z-30">
+            <header class="sticky-header h-16 px-6 flex justify-between items-center z-30">
                 <div class="flex items-center gap-3">
                     <button onclick="App.logout()" title="Logout"
-                        class="text-gray-400 hover:text-red-500 transition-colors">
-                        <i class="fa-solid fa-power-off"></i>
+                        class="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center text-gray-400 hover:text-red-500 transition-all active:scale-95">
+                        <i class="fa-solid fa-power-off text-sm"></i>
                     </button>
                     <div class="h-6 w-px bg-gray-200 mx-1"></div>
                     <div>
-                        <h1 class="font-bold text-gray-900 text-sm">Teacher Panel</h1>
-                        <div class="flex items-center gap-1.5 cursor-pointer hover:bg-gray-100 px-1.5 rounded transition-colors"
+                        <h1 class="font-black text-gray-900 tracking-tight text-sm uppercase">Teacher Panel</h1>
+                        <div class="flex items-center gap-1.5 cursor-pointer hover:bg-gray-100 px-1.5 py-0.5 rounded-md transition-colors"
                             onclick="App.copyCode()">
-                            <p class="text-xs text-gray-500 font-mono tracking-wider " id="teacher-code-display">CODE
-                            </p>
+                            <p class="text-[10px] text-gray-400 font-mono font-bold tracking-widest"
+                                id="teacher-code-display">----</p>
                             <i class="fa-regular fa-copy text-[10px] text-gray-400"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <!-- Magic Wand AI (Teacher) -->
-                    <a href="teacher-ai.html" title="Open AI Teacher Helper"
-                        class="text-purple-500 hover:text-purple-700 transition-colors text-xl">
+                    <a href="teacher-ai.html" title="AI Teacher Topic Generator"
+                        class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 hover:bg-purple-100 transition-all active:scale-95">
                         <i class="fa-solid fa-wand-magic-sparkles"></i>
                     </a>
-                    <button onclick="App.toggleModal('history')" title="View History"
-                        class="text-gray-400 hover:text-blue-500 transition-colors">
+                    <button onclick="App.toggleModal('history')" title="View Session History"
+                        class="text-gray-400 hover:text-[#0071e3] transition-colors">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                     </button>
-                    <button id="teacher-tts-btn" onclick="App.toggleTTS()" title="Toggle Voice Output"
-                        class="text-gray-400 hover:text-blue-500 transition-colors">
+                    <button id="teacher-tts-btn" onclick="App.toggleTTS()" title="Toggle Audio Feed"
+                        class="text-gray-400 hover:text-[#0071e3] transition-colors">
                         <i id="teacher-tts-icon" class="fa-solid fa-volume-xmark"></i>
                     </button>
                     <!-- Mic Toggle -->
-                    <button id="mic-btn" onclick="App.toggleMic()" title="Toggle Microphone"
-                        class="btn-modern relative w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center transition-all hover:bg-gray-200">
+                    <button id="mic-btn" onclick="App.toggleMic()" title="Mic On/Off"
+                        class="btn-apple relative w-10 h-10 bg-[#f5f5f7] text-gray-600 flex items-center justify-center transition-all hover:bg-gray-200">
                         <i class="fa-solid fa-microphone-slash text-sm"></i>
                     </button>
                 </div>
@@ -490,32 +506,33 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
                     <div class="px-4 py-3 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center">
                         <div class="flex gap-4">
-                            <button
-                                onclick="document.getElementById('teacher-questions').classList.remove('hidden'); document.getElementById('teacher-speak-requests').classList.add('hidden');"
+                            <button title="Questions Tab" onclick="App.toggleTab('questions')"
                                 class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-blue-600 transition-colors">Questions
                                 <span id="question-count"
                                     class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full ml-1">0</span></button>
-                            <button
-                                onclick="document.getElementById('teacher-questions').classList.add('hidden'); document.getElementById('teacher-speak-requests').classList.remove('hidden');"
+                            <button title="Speak Requests Tab" onclick="App.toggleTab('speak')"
                                 class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-blue-600 transition-colors">Speak
                                 Requests <span id="speak-request-count"
                                     class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded-full ml-1">0</span></button>
                         </div>
                     </div>
-                    <div id="teacher-questions"
-                        class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 custom-scrollbar">
-                        <!-- Questions injected here -->
-                        <div class="text-center py-8 opacity-40">
-                            <i class="fa-regular fa-comments text-2xl mb-2 text-gray-400"></i>
-                            <p class="text-xs text-gray-500">No questions yet</p>
+                    <div class="flex-1 overflow-y-auto p-4 relative h-full">
+                        <!-- Questions Panel -->
+                        <div id="panel-questions" class="space-y-3">
+                            <div class="text-center py-8 opacity-40">
+                                <i class="fa-solid fa-hand text-2xl mb-2"></i>
+                                <p class="text-[11px] font-bold uppercase tracking-tight">No Active Hands
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <div id="teacher-speak-requests"
-                        class="hidden flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 custom-scrollbar">
-                        <!-- Speak Requests injected here -->
-                        <div class="text-center py-8 opacity-40">
-                            <i class="fa-solid fa-microphone-lines text-2xl mb-2 text-gray-400"></i>
-                            <p class="text-xs text-gray-500">No speak requests yet</p>
+
+                        <!-- Speak Requests Panel -->
+                        <div id="panel-speak" class="hidden space-y-3">
+                            <div class="text-center py-8 opacity-40">
+                                <i class="fa-solid fa-microphone-lines text-2xl mb-2"></i>
+                                <p class="text-[11px] font-bold uppercase tracking-tight">No Speak Requests
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -526,27 +543,35 @@
         <div id="modal-question" class="fixed inset-0 z-50 hidden">
             <!-- Backdrop -->
             <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity opacity-0"
-                id="modal-backdrop" onclick="App.toggleModal('question')"></div>
+                id="modal-backdrop" onclick="App.toggleModal('question')" title="Close Modal"></div>
 
             <!-- Content -->
             <div class="absolute bottom-0 left-0 right-0 md:top-1/2 md:left-1/2 md:bottom-auto md:w-full md:max-w-sm md:-translate-x-1/2 md:-translate-y-1/2 transition-transform transform translate-y-full"
                 id="modal-panel">
-                <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-1">Ask a Question</h3>
-                    <p class="text-sm text-gray-500 mb-6">Your question will be translated for the teacher.</p>
+                <div class="bg-white rounded-t-3xl md:rounded-[32px] shadow-2xl p-8">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="text-xl font-black text-gray-900 tracking-tight">Ask a Question</h3>
+                            <p class="text-[13px] text-gray-500 font-medium">Your question will be translated.</p>
+                        </div>
+                        <button onclick="App.toggleModal('question')" title="Close"
+                            class="text-gray-400 hover:text-gray-900 p-1">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
 
                     <div class="relative mb-6">
-                        <input id="q-input" type="text"
-                            class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 text-base outline-none focus:border-blue-500 transition-colors"
-                            placeholder="Type your question..."
-                            onkeydown="if(event.key === 'Enter') App.sendQuestion()">
+                        <textarea id="q-input" rows="3"
+                            class="input-apple w-full px-5 py-4 text-gray-900 outline-none placeholder:text-gray-300 resize-none"
+                            placeholder="Type your question here..."></textarea>
                     </div>
 
                     <div class="flex gap-3">
-                        <button onclick="App.toggleModal('question')"
-                            class="flex-1 py-3 text-sm font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
-                        <button onclick="App.sendQuestion()"
-                            class="flex-1 py-3 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-colors">Send</button>
+                        <button onclick="App.sendQuestion()" title="Submit Question"
+                            class="btn-apple flex-1 bg-[#0071e3] hover:bg-[#0077ed] text-white py-4 shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 text-lg">
+                            <span>Send</span>
+                            <i class="fa-solid fa-paper-plane text-sm"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -600,269 +625,270 @@
                     <p class="text-[10px] text-gray-500 font-medium truncate">Install Now</p>
                 </div>
                 <!-- iOS/Default Install Button -->
-                <button onclick="App.installApp()" id="btn-banner-install"
+                <button onclick="App.installApp()" id="btn-banner-install" title="Install Application"
                     class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-lg shadow-blue-500/20 transition-all active:scale-95 whitespace-nowrap">
                     Install
                 </button>
                 <!-- Close -->
-                <button onclick="App.dismissBanner()"
+                <button onclick="App.dismissBanner()" title="Dismiss Installation Banner"
                     class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
         </div>
 
-    </main>
+        </main>
 
-    <!-- ================= LOGIC ================= -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { createClient, LiveTranscriptionEvents } from 'https://cdn.jsdelivr.net/npm/@deepgram/sdk@3/+esm';
-        import { SpeakManager } from './speak-logic.js';
+        <!-- ================= LOGIC ================= -->
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+            import { getDatabase, ref, push, onChildAdded, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+            import { createClient, LiveTranscriptionEvents } from 'https://cdn.jsdelivr.net/npm/@deepgram/sdk@3/+esm';
+            import { SpeakManager } from './speak-logic.js';
 
-        // --- CREDENTIALS ---
-        const CREDENTIALS = {
-            DEEPGRAM: "11ee938d032ce7c36c6fa82338274be5e4ada847",
-            CARTESIA: "sk_car_yWEX9Mp2LwKju8FXyosGhj",
-            CARTESIA_VOICES: {
-                // Standard languages
-                "en": "cbaf8084-f009-4838-a096-07ee2e6612b1", // Cathy
-                "hi": "faf0731e-dfb9-4cfc-8119-259a79b27e12", // Riya
-                "es": "5c5ad5e7-1020-476b-8b91-fdcbe9cc313c", // Daniela
-                "de": "38aabb6a-f52b-4fb0-a3d1-988518f4dc06", // Alina
-                "ar": "002622d8-19d0-4567-a16a-f99c7397c062", // Huda
-                "fr": "a8a1eb38-5f15-4c1d-8722-7ac0f329727d", // Calm French Woman
-                "ko": "304fdbd8-65e6-40d6-ab78-f9d18b9efdf9", // Jihyun
-                "ja": "2b568345-1d48-4047-b25f-7baccf842eb0", // Yumiko
-                "pt": "700d1ee3-a641-4018-ba6e-899dcadc9e2b", // Luana
-                "ta": "25d2c432-139c-4035-bfd6-9baaabcdd006", // Kavya
-                "te": "07bc462a-c644-49f1-baf7-82d5599131be", // Sindhu
+            // --- CREDENTIALS ---
+            const CREDENTIALS = {
+                DEEPGRAM: "11ee938d032ce7c36c6fa82338274be5e4ada847",
+                CARTESIA: "sk_car_yWEX9Mp2LwKju8FXyosGhj",
+                CARTESIA_VOICES: {
+                    // Standard languages
+                    "en": "cbaf8084-f009-4838-a096-07ee2e6612b1", // Cathy
+                    "hi": "faf0731e-dfb9-4cfc-8119-259a79b27e12", // Riya
+                    "es": "5c5ad5e7-1020-476b-8b91-fdcbe9cc313c", // Daniela
+                    "de": "38aabb6a-f52b-4fb0-a3d1-988518f4dc06", // Alina
+                    "ar": "002622d8-19d0-4567-a16a-f99c7397c062", // Huda
+                    "fr": "a8a1eb38-5f15-4c1d-8722-7ac0f329727d", // Calm French Woman
+                    "ko": "304fdbd8-65e6-40d6-ab78-f9d18b9efdf9", // Jihyun
+                    "ja": "2b568345-1d48-4047-b25f-7baccf842eb0", // Yumiko
+                    "pt": "700d1ee3-a641-4018-ba6e-899dcadc9e2b", // Luana
+                    "ta": "25d2c432-139c-4035-bfd6-9baaabcdd006", // Kavya
+                    "te": "07bc462a-c644-49f1-baf7-82d5599131be", // Sindhu
 
-                // SPECIFIC VOICE MAPPINGS FOR REQUESTED LANGUAGES
-                "nl": "9e8db62d-056f-47f3-b3b6-1b05767f9176", // Dutch Netherlands
-                "nl-BE": "005af375-5aad-4c02-9551-7fc411430542", // Flemish
-                "tl": "4b7f7e2f-9b36-429d-89b9-73685d4dd0b4", // Tagalog
+                    // SPECIFIC VOICE MAPPINGS FOR REQUESTED LANGUAGES
+                    "nl": "9e8db62d-056f-47f3-b3b6-1b05767f9176", // Dutch Netherlands
+                    "nl-BE": "005af375-5aad-4c02-9551-7fc411430542", // Flemish
+                    "tl": "4b7f7e2f-9b36-429d-89b9-73685d4dd0b4", // Tagalog
 
-                "default": "cbaf8084-f009-4838-a096-07ee2e6612b1"
-            },
-            FIREBASE: {
-                apiKey: "AIzaSyC93B2GgE3HzaWl5gW_mRroobQybaZNFJs",
-                authDomain: "macx-5feca.firebaseapp.com",
-                databaseURL: "https://macx-5feca-default-rtdb.asia-southeast1.firebasedatabase.app",
-                projectId: "macx-5feca",
-                storageBucket: "macx-5feca.appspot.com",
-                messagingSenderId: "123456789012",
-                appId: "1:123456789012:web:abcdef1234567890abcdef"
-            }
-        };
-
-        // LANGUAGE LIST WITH SPECIFIC MAPPINGS
-        const LANGUAGES = [
-            { code: 'en', name: 'English', flag: '🇺🇸' },
-            { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-            { code: 'fr', name: 'French', flag: '🇫🇷' },
-            { code: 'de', name: 'German', flag: '🇩🇪' },
-            { code: 'zh', name: 'Chinese (Mandarin)', flag: '🇨🇳' },
-            { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
-            { code: 'ar', name: 'Arabic', flag: '🇸🇦' },
-            { code: 'pt', name: 'Portuguese', flag: '🇵🇹' },
-            { code: 'bn', name: 'Bengali', flag: '🇧🇩' },
-            { code: 'ru', name: 'Russian', flag: '🇷🇺' },
-            { code: 'ja', name: 'Japanese', flag: '🇯🇵' },
-            { code: 'ko', name: 'Korean', flag: '🇰🇷' },
-            { code: 'vi', name: 'Vietnamese', flag: '🇻🇳' },
-            { code: 'it', name: 'Italian', flag: '🇮🇹' },
-            { code: 'tr', name: 'Turkish', flag: '🇹🇷' },
-
-            // --- BENELUX (Belgium, Netherlands, Luxembourg) ---
-            { code: 'nl', name: 'Dutch', flag: '🇳🇱' },
-            { code: 'nl-BE', name: 'Flemish', flag: '🇧🇪' },
-            { code: 'fr-BE', name: 'Belgian French', flag: '🇧🇪' },
-            { code: 'de-BE', name: 'Belgian German', flag: '🇧🇪' },
-            { code: 'lb', name: 'Luxembourgish', flag: '🇱🇺' },
-
-            // --- FRANCE & REGIONAL ---
-            { code: 'br', name: 'Breton', flag: '🇫🇷' },
-            { code: 'co', name: 'Corsican', flag: '🇫🇷' },
-            { code: 'eu', name: 'Basque', flag: '🇪🇸' },
-            { code: 'ca', name: 'Catalan', flag: '🇪🇸' },
-
-            // --- GERMANY & REGIONAL ---
-            { code: 'de-AT', name: 'Austrian German', flag: '🇦🇹' },
-            { code: 'de-CH', name: 'Swiss German', flag: '🇨🇭' },
-
-            // --- EUROPEAN BROAD ---
-            { code: 'pl', name: 'Polish', flag: '🇵🇱' },
-            { code: 'uk', name: 'Ukrainian', flag: '🇺🇦' },
-            { code: 'ro', name: 'Romanian', flag: '🇷🇴' },
-            { code: 'el', name: 'Greek', flag: '🇬🇷' },
-            { code: 'cs', name: 'Czech', flag: '🇨🇿' },
-            { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },
-            { code: 'sv', name: 'Swedish', flag: '🇸🇪' },
-            { code: 'da', name: 'Danish', flag: '🇩🇰' },
-            { code: 'no', name: 'Norwegian', flag: '🇳🇴' },
-            { code: 'fi', name: 'Finnish', flag: '🇫🇮' },
-            { code: 'sk', name: 'Slovak', flag: '🇸🇰' },
-            { code: 'bg', name: 'Bulgarian', flag: '🇧🇬' },
-            { code: 'hr', name: 'Croatian', flag: '🇭🇷' },
-            { code: 'sr', name: 'Serbian', flag: '🇷🇸' },
-            { code: 'sl', name: 'Slovenian', flag: '🇸🇮' },
-            { code: 'lt', name: 'Lithuanian', flag: '🇱🇹' },
-            { code: 'lv', name: 'Latvian', flag: '🇱🇻' },
-            { code: 'et', name: 'Estonian', flag: '🇪🇪' },
-            { code: 'is', name: 'Icelandic', flag: '🇮🇸' },
-            { code: 'ga', name: 'Irish', flag: '🇮🇪' },
-            { code: 'cy', name: 'Welsh', flag: '🏴' },
-            { code: 'gd', name: 'Scottish Gaelic', flag: '🏴' },
-            { code: 'sq', name: 'Albanian', flag: '🇦🇱' },
-            { code: 'mk', name: 'Macedonian', flag: '🇲🇰' },
-            { code: 'mt', name: 'Maltese', flag: '🇲🇹' },
-
-            // --- ASIA & PACIFIC ---
-            { code: 'th', name: 'Thai', flag: '🇹🇭' },
-            { code: 'id', name: 'Indonesian', flag: '🇮🇩' },
-            { code: 'ms', name: 'Malay', flag: '🇲🇾' },
-            { code: 'tl', name: 'Tagalog', flag: '🇵🇭' },
-            { code: 'pa', name: 'Punjabi', flag: '🇮🇳' },
-            { code: 'te', name: 'Telugu', flag: '🇮🇳' },
-            { code: 'mr', name: 'Marathi', flag: '🇮🇳' },
-            { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
-            { code: 'gu', name: 'Gujarati', flag: '🇮🇳' },
-            { code: 'kn', name: 'Kannada', flag: '🇮🇳' },
-            { code: 'ml', name: 'Malayalam', flag: '🇮🇳' },
-            { code: 'my', name: 'Burmese', flag: '🇲🇲' },
-            { code: 'km', name: 'Khmer', flag: '🇰🇭' },
-            { code: 'lo', name: 'Lao', flag: '🇱🇦' },
-            { code: 'si', name: 'Sinhala', flag: '🇱🇰' },
-            { code: 'ne', name: 'Nepali', flag: '🇳🇵' },
-
-            // --- AFRICA ---
-            { code: 'sw', name: 'Swahili', flag: '🇹🇿' },
-            { code: 'am', name: 'Amharic', flag: '🇪🇹' },
-            { code: 'yo', name: 'Yoruba', flag: '🇳🇬' },
-            { code: 'ig', name: 'Igbo', flag: '🇳🇬' },
-            { code: 'zu', name: 'Zulu', flag: '🇿🇦' },
-            { code: 'xh', name: 'Xhosa', flag: '🇿🇦' },
-            { code: 'af', name: 'Afrikaans', flag: '🇿🇦' },
-            { code: 'ha', name: 'Hausa', flag: '🇳🇬' },
-            { code: 'so', name: 'Somali', flag: '🇸🇴' },
-
-            // --- AMERICAS ---
-            { code: 'qu', name: 'Quechua', flag: '🇵🇪' },
-            { code: 'gn', name: 'Guarani', flag: '🇵🇾' },
-            { code: 'ht', name: 'Haitian Creole', flag: '🇭🇹' }
-        ];
-
-        class SuccesApp {
-            constructor() {
-                this.app = initializeApp(CREDENTIALS.FIREBASE);
-                this.db = getDatabase(this.app);
-
-                this.state = {
-                    role: null,
-                    room: '',
-                    name: '',
-                    gender: 'Male',
-                    lang: 'en',
-                    isMicActive: false,
-                    isTTSActive: false,
-                    audioQueue: [],
-                    isAudioPlaying: false,
-                    ttsSpeed: 1.1 // Increased speed for low latency
-                };
-
-                this.speakManager = new SpeakManager(this);
-
-                this.dgClient = null;
-                this.dgSocket = null;
-                this.mediaRecorder = null;
-                this.wakeLock = null;
-
-                // PWA State
-                this.deferredPrompt = null;
-                this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-                this.bindAll();
-                this.init();
-            }
-
-            saveState() {
-                localStorage.setItem('orbit_session', JSON.stringify({
-                    role: this.state.role,
-                    room: this.state.room,
-                    name: this.state.name,
-                    lang: this.state.lang,
-                    currentView: this.state.currentView
-                }));
-            }
-
-            clearState() {
-                localStorage.removeItem('orbit_session');
-            }
-
-            bindAll() {
-                ['handleLogin', 'handleTeacherLogin', 'toggleTeacherMode', 'startSession', 'logout', 'toggleMic', 'sendQuestion', 'toggleModal', 'sendReaction', 'toggleTTS', 'installApp', 'dismissBanner'].forEach(m => this[m] = this[m].bind(this));
-            }
-
-            init() {
-                // Populate both language selects
-                const ops = LANGUAGES.map(l => `<option value="${l.code}" ${l.code === 'en' ? 'selected' : ''}>${l.flag || ''} ${l.name}</option>`).join('');
-                document.getElementById('login-lang').innerHTML = ops;
-                document.getElementById('teacher-lang').innerHTML = ops;
-                window.App = this;
-
-                // Restore Session
-                const saved = localStorage.getItem('orbit_session');
-                if (saved) {
-                    try {
-                        const data = JSON.parse(saved);
-                        this.state = { ...this.state, ...data };
-
-                        if (this.state.role === 'student' && this.state.room) {
-                            this.initStudent();
-                            this.switchView(this.state.currentView || 'view-student');
-                        } else if (this.state.role === 'teacher' && this.state.room) {
-                            if (this.state.currentView === 'view-teacher') {
-                                this.initTeacher();
-                                this.switchView('view-teacher');
-                            } else {
-                                document.getElementById('lobby-code').innerText = this.state.room;
-                                this.switchView('view-lobby');
-                            }
-                        }
-                    } catch (e) { this.clearState(); }
+                    "default": "cbaf8084-f009-4838-a096-07ee2e6612b1"
+                },
+                FIREBASE: {
+                    apiKey: "AIzaSyC93B2GgE3HzaWl5gW_mRroobQybaZNFJs",
+                    authDomain: "macx-5feca.firebaseapp.com",
+                    databaseURL: "https://macx-5feca-default-rtdb.asia-southeast1.firebasedatabase.app",
+                    projectId: "macx-5feca",
+                    storageBucket: "macx-5feca.appspot.com",
+                    messagingSenderId: "123456789012",
+                    appId: "1:123456789012:web:abcdef1234567890abcdef"
                 }
-                this.registerServiceWorker();
+            };
 
-                // PWA Install Check
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    this.deferredPrompt = e;
-                });
+            // LANGUAGE LIST WITH SPECIFIC MAPPINGS
+            const LANGUAGES = [
+                { code: 'en', name: 'English', flag: '🇺🇸' },
+                { code: 'es', name: 'Spanish', flag: '🇪🇸' },
+                { code: 'fr', name: 'French', flag: '🇫🇷' },
+                { code: 'de', name: 'German', flag: '🇩🇪' },
+                { code: 'zh', name: 'Chinese (Mandarin)', flag: '🇨🇳' },
+                { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
+                { code: 'ar', name: 'Arabic', flag: '🇸🇦' },
+                { code: 'pt', name: 'Portuguese', flag: '🇵🇹' },
+                { code: 'bn', name: 'Bengali', flag: '🇧🇩' },
+                { code: 'ru', name: 'Russian', flag: '🇷🇺' },
+                { code: 'ja', name: 'Japanese', flag: '🇯🇵' },
+                { code: 'ko', name: 'Korean', flag: '🇰🇷' },
+                { code: 'vi', name: 'Vietnamese', flag: '🇻🇳' },
+                { code: 'it', name: 'Italian', flag: '🇮🇹' },
+                { code: 'tr', name: 'Turkish', flag: '🇹🇷' },
 
-                setTimeout(() => this.checkInstall(), 2000); // Check after a brief delay
-            }
+                // --- BENELUX (Belgium, Netherlands, Luxembourg) ---
+                { code: 'nl', name: 'Dutch', flag: '🇳🇱' },
+                { code: 'nl-BE', name: 'Flemish', flag: '🇧🇪' },
+                { code: 'fr-BE', name: 'Belgian French', flag: '🇧🇪' },
+                { code: 'de-BE', name: 'Belgian German', flag: '🇧🇪' },
+                { code: 'lb', name: 'Luxembourgish', flag: '🇱🇺' },
 
-            // --- NAVIGATION ---
-            switchView(viewId) {
-                this.state.currentView = viewId;
-                this.saveState();
+                // --- FRANCE & REGIONAL ---
+                { code: 'br', name: 'Breton', flag: '🇫🇷' },
+                { code: 'co', name: 'Corsican', flag: '🇫🇷' },
+                { code: 'eu', name: 'Basque', flag: '🇪🇸' },
+                { code: 'ca', name: 'Catalan', flag: '🇪🇸' },
 
-                document.querySelectorAll('section').forEach(el => {
-                    el.classList.remove('view-active');
-                    el.classList.add('view-hidden');
-                });
-                const target = document.getElementById(viewId);
-                setTimeout(() => {
-                    target.classList.remove('view-hidden');
-                    target.classList.add('view-active');
-                }, 50);
-            }
+                // --- GERMANY & REGIONAL ---
+                { code: 'de-AT', name: 'Austrian German', flag: '🇦🇹' },
+                { code: 'de-CH', name: 'Swiss German', flag: '🇨🇭' },
 
-            registerServiceWorker() {
-                if ('serviceWorker' in navigator) {
-                    const swCode = `
+                // --- EUROPEAN BROAD ---
+                { code: 'pl', name: 'Polish', flag: '🇵🇱' },
+                { code: 'uk', name: 'Ukrainian', flag: '🇺🇦' },
+                { code: 'ro', name: 'Romanian', flag: '🇷🇴' },
+                { code: 'el', name: 'Greek', flag: '🇬🇷' },
+                { code: 'cs', name: 'Czech', flag: '🇨🇿' },
+                { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },
+                { code: 'sv', name: 'Swedish', flag: '🇸🇪' },
+                { code: 'da', name: 'Danish', flag: '🇩🇰' },
+                { code: 'no', name: 'Norwegian', flag: '🇳🇴' },
+                { code: 'fi', name: 'Finnish', flag: '🇫🇮' },
+                { code: 'sk', name: 'Slovak', flag: '🇸🇰' },
+                { code: 'bg', name: 'Bulgarian', flag: '🇧🇬' },
+                { code: 'hr', name: 'Croatian', flag: '🇭🇷' },
+                { code: 'sr', name: 'Serbian', flag: '🇷🇸' },
+                { code: 'sl', name: 'Slovenian', flag: '🇸🇮' },
+                { code: 'lt', name: 'Lithuanian', flag: '🇱🇹' },
+                { code: 'lv', name: 'Latvian', flag: '🇱🇻' },
+                { code: 'et', name: 'Estonian', flag: '🇪🇪' },
+                { code: 'is', name: 'Icelandic', flag: '🇮🇸' },
+                { code: 'ga', name: 'Irish', flag: '🇮🇪' },
+                { code: 'cy', name: 'Welsh', flag: '🏴' },
+                { code: 'gd', name: 'Scottish Gaelic', flag: '🏴' },
+                { code: 'sq', name: 'Albanian', flag: '🇦🇱' },
+                { code: 'mk', name: 'Macedonian', flag: '🇲🇰' },
+                { code: 'mt', name: 'Maltese', flag: '🇲🇹' },
+
+                // --- ASIA & PACIFIC ---
+                { code: 'th', name: 'Thai', flag: '🇹🇭' },
+                { code: 'id', name: 'Indonesian', flag: '🇮🇩' },
+                { code: 'ms', name: 'Malay', flag: '🇲🇾' },
+                { code: 'tl', name: 'Tagalog', flag: '🇵🇭' },
+                { code: 'pa', name: 'Punjabi', flag: '🇮🇳' },
+                { code: 'te', name: 'Telugu', flag: '🇮🇳' },
+                { code: 'mr', name: 'Marathi', flag: '🇮🇳' },
+                { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
+                { code: 'gu', name: 'Gujarati', flag: '🇮🇳' },
+                { code: 'kn', name: 'Kannada', flag: '🇮🇳' },
+                { code: 'ml', name: 'Malayalam', flag: '🇮🇳' },
+                { code: 'my', name: 'Burmese', flag: '🇲🇲' },
+                { code: 'km', name: 'Khmer', flag: '🇰🇭' },
+                { code: 'lo', name: 'Lao', flag: '🇱🇦' },
+                { code: 'si', name: 'Sinhala', flag: '🇱🇰' },
+                { code: 'ne', name: 'Nepali', flag: '🇳🇵' },
+
+                // --- AFRICA ---
+                { code: 'sw', name: 'Swahili', flag: '🇹🇿' },
+                { code: 'am', name: 'Amharic', flag: '🇪🇹' },
+                { code: 'yo', name: 'Yoruba', flag: '🇳🇬' },
+                { code: 'ig', name: 'Igbo', flag: '🇳🇬' },
+                { code: 'zu', name: 'Zulu', flag: '🇿🇦' },
+                { code: 'xh', name: 'Xhosa', flag: '🇿🇦' },
+                { code: 'af', name: 'Afrikaans', flag: '🇿🇦' },
+                { code: 'ha', name: 'Hausa', flag: '🇳🇬' },
+                { code: 'so', name: 'Somali', flag: '🇸🇴' },
+
+                // --- AMERICAS ---
+                { code: 'qu', name: 'Quechua', flag: '🇵🇪' },
+                { code: 'gn', name: 'Guarani', flag: '🇵🇾' },
+                { code: 'ht', name: 'Haitian Creole', flag: '🇭🇹' }
+            ];
+
+            class SuccesApp {
+                constructor() {
+                    this.app = initializeApp(CREDENTIALS.FIREBASE);
+                    this.db = getDatabase(this.app);
+
+                    this.state = {
+                        role: null,
+                        room: '',
+                        name: '',
+                        gender: 'Male',
+                        lang: 'en',
+                        isMicActive: false,
+                        isTTSActive: false,
+                        audioQueue: [],
+                        isAudioPlaying: false,
+                        ttsSpeed: 1.1 // Increased speed for low latency
+                    };
+
+                    this.speakManager = new SpeakManager(this);
+
+                    this.dgClient = null;
+                    this.dgSocket = null;
+                    this.mediaRecorder = null;
+                    this.wakeLock = null;
+
+                    // PWA State
+                    this.deferredPrompt = null;
+                    this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+                    this.bindAll();
+                    this.init();
+                }
+
+                saveState() {
+                    localStorage.setItem('orbit_session', JSON.stringify({
+                        role: this.state.role,
+                        room: this.state.room,
+                        name: this.state.name,
+                        lang: this.state.lang,
+                        currentView: this.state.currentView
+                    }));
+                }
+
+                clearState() {
+                    localStorage.removeItem('orbit_session');
+                }
+
+                bindAll() {
+                    ['handleLogin', 'handleTeacherLogin', 'toggleTeacherMode', 'startSession', 'logout', 'toggleMic', 'sendQuestion', 'toggleModal', 'sendReaction', 'toggleTTS', 'installApp', 'dismissBanner'].forEach(m => this[m] = this[m].bind(this));
+                }
+
+                init() {
+                    // Populate both language selects
+                    const ops = LANGUAGES.map(l => `<option value="${l.code}" ${l.code === 'en' ? 'selected' : ''}>${l.flag || ''} ${l.name}</option>`).join('');
+                    document.getElementById('login-lang').innerHTML = ops;
+                    document.getElementById('teacher-lang').innerHTML = ops;
+                    window.App = this;
+
+                    // Restore Session
+                    const saved = localStorage.getItem('orbit_session');
+                    if (saved) {
+                        try {
+                            const data = JSON.parse(saved);
+                            this.state = { ...this.state, ...data };
+
+                            if (this.state.role === 'student' && this.state.room) {
+                                this.initStudent();
+                                this.switchView(this.state.currentView || 'view-student');
+                            } else if (this.state.role === 'teacher' && this.state.room) {
+                                if (this.state.currentView === 'view-teacher') {
+                                    this.initTeacher();
+                                    this.switchView('view-teacher');
+                                } else {
+                                    document.getElementById('lobby-code').innerText = this.state.room;
+                                    this.switchView('view-lobby');
+                                }
+                            }
+                        } catch (e) { this.clearState(); }
+                    }
+                    this.registerServiceWorker();
+
+                    // PWA Install Check
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        this.deferredPrompt = e;
+                    });
+
+                    setTimeout(() => this.checkInstall(), 2000); // Check after a brief delay
+                }
+
+                // --- NAVIGATION ---
+                switchView(viewId) {
+                    this.state.currentView = viewId;
+                    this.saveState();
+
+                    document.querySelectorAll('section').forEach(el => {
+                        el.classList.remove('view-active');
+                        el.classList.add('view-hidden');
+                    });
+
+                    const target = document.getElementById(viewId);
+                    if (target) {
+                        target.classList.remove('view-hidden');
+                        target.classList.add('view-active');
+                    }
+                }
+
+                registerServiceWorker() {
+                    if ('serviceWorker' in navigator) {
+                        const swCode = `
                         const CACHE_NAME = 'orbit-v1';
                         const ASSETS = ['./', './index.html', './pwa_icon.png'];
                         self.addEventListener('install', (e) => {
@@ -872,378 +898,348 @@
                             e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
                         });
                     `;
-                    const blob = new Blob([swCode], { type: 'application/javascript' });
-                    const url = URL.createObjectURL(blob);
-                    navigator.serviceWorker.register(url).catch(err => console.log('SW failed', err));
-                }
-            }
-
-            async requestPermissions() {
-                try {
-                    await navigator.mediaDevices.getUserMedia({ audio: true });
-                    if ('Notification' in window) {
-                        await Notification.requestPermission();
-                    }
-                } catch (e) {
-                    this.showToast("Mic permission required", "error");
-                }
-            }
-
-            toggleModal(type) {
-                const modal = document.getElementById(`modal-${type}`);
-                if (!modal) return;
-
-                const bd = document.getElementById(type === 'history' ? 'history-backdrop' : 'modal-backdrop');
-                const panel = document.getElementById(type === 'history' ? 'history-panel' : 'modal-panel');
-
-                if (modal.classList.contains('hidden')) {
-                    modal.classList.remove('hidden');
-                    if (type === 'history') this.loadHistory();
-
-                    requestAnimationFrame(() => {
-                        bd.style.opacity = '1';
-                        // Handle different panel sizes/positions if needed, but standard logic works for now.
-                        panel.style.transform = (window.innerWidth < 768) ? 'translateY(0)' : 'translate(-50%, -50%)';
-
-                        if (type === 'question') {
-                            const input = document.getElementById('q-input');
-                            if (input) input.focus();
-                        }
-                    });
-                } else {
-                    bd.style.opacity = '0';
-                    panel.style.transform = (window.innerWidth < 768) ? 'translateY(100%)' : 'translate(-50%, 0)';
-                    setTimeout(() => modal.classList.add('hidden'), 300);
-                }
-            }
-
-            // --- PWA INSTALLATION ---
-            checkInstall() {
-                // Check if already installed (standalone mode)
-                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
-                // STRICT: Only show if we have a native prompt (Android/Desktop)
-                // This hides it on iOS where native install isn't supported via button
-                if (!isStandalone && this.deferredPrompt) {
-                    // Check if dismissed previously in session
-                    if (!sessionStorage.getItem('banner_dismissed')) {
-                        // Show banner
-                        const banner = document.getElementById('install-banner');
-                        if (banner) banner.classList.remove('-translate-y-full'); // slide down
+                        const blob = new Blob([swCode], { type: 'application/javascript' });
+                        const url = URL.createObjectURL(blob);
+                        navigator.serviceWorker.register(url).catch(err => console.log('SW failed', err));
                     }
                 }
-            }
 
-            dismissBanner() {
-                const banner = document.getElementById('install-banner');
-                if (banner) banner.classList.add('-translate-y-full'); // slide up
-                sessionStorage.setItem('banner_dismissed', 'true');
-            }
-
-            async installApp() {
-                if (this.deferredPrompt) {
-                    // Trigger Native Prompt
-                    this.deferredPrompt.prompt();
-                    const { outcome } = await this.deferredPrompt.userChoice;
-                    console.log(`User response to the install prompt: ${outcome}`);
-                    this.deferredPrompt = null;
-                    if (outcome === 'accepted') {
-                        this.dismissBanner();
-                    }
-                } else {
-                    this.showToast("Installation not supported/available", "info");
-                }
-            }
-
-            async loadHistory() {
-                const container = document.getElementById('history-content');
-                container.innerHTML = '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-circle-notch animate-spin text-2xl"></i></div>';
-
-                if (!this.state.room) return;
-
-                try {
-                    const data = [];
-                    // Fetch Messages (Broadcasts)
-                    const mSnap = await get(ref(this.db, `chats/${this.state.room}/messages`));
-                    if (mSnap.exists()) {
-                        mSnap.forEach(s => {
-                            data.push({ ...s.val(), type: 'broadcast', ts: s.key });
-                        });
-                    }
-
-                    // Fetch Questions
-                    const qSnap = await get(ref(this.db, `chats/${this.state.room}/questions`));
-                    if (qSnap.exists()) {
-                        qSnap.forEach(s => {
-                            data.push({ ...s.val(), type: 'question', ts: s.key });
-                        });
-                    }
-
-                    // Sort by timestamp
-                    data.sort((a, b) => b.ts.localeCompare(a.ts));
-
-                    if (data.length === 0) {
-                        container.innerHTML = '<div class="text-center py-20 opacity-30"><p class="text-sm font-bold">No history available</p></div>';
-                        return;
-                    }
-
-                    container.innerHTML = '';
-                    for (const item of data) {
-                        if (this.state.role === 'student') {
-                            if (item.type === 'broadcast') {
-                                const trans = await this.translateText(item.text, item.lang, this.state.lang);
-                                this.renderHistoryItem(container, trans, item.text, 'Teacher', 'broadcast');
+                async requestPermissions() {
+                    try {
+                        // Optimized Mic Constraints for STT Robustness
+                        const micConstraints = {
+                            audio: {
+                                echoCancellation: true,
+                                noiseSuppression: true,
+                                autoGainControl: true
                             }
-                        } else {
-                            if (item.type === 'broadcast') {
-                                this.renderHistoryItem(container, item.text, item.text, 'You', 'broadcast');
+                        };
+                        await navigator.mediaDevices.getUserMedia(micConstraints);
+                        this.state.isMicGranted = true;
+
+                        if ('Notification' in window) {
+                            await Notification.requestPermission();
+                        }
+                    } catch (e) {
+                        console.error("Permission error", e);
+                        this.state.isMicGranted = false;
+                    }
+                }
+
+                toggleModal(type) {
+                    const modal = document.getElementById(`modal-${type}`);
+                    if (!modal) return;
+
+                    const bd = document.getElementById(type === 'history' ? 'history-backdrop' : 'modal-backdrop');
+                    const panel = document.getElementById(type === 'history' ? 'history-panel' : 'modal-panel');
+
+                    if (modal.classList.contains('hidden')) {
+                        modal.classList.remove('hidden');
+                        if (type === 'history') this.loadHistory();
+
+                        requestAnimationFrame(() => {
+                            bd.style.opacity = '1';
+                            // Handle different panel sizes/positions if needed, but standard logic works for now.
+                            panel.style.transform = (window.innerWidth < 768) ? 'translateY(0)' : 'translate(-50%, -50%)';
+
+                            if (type === 'question') {
+                                const input = document.getElementById('q-input');
+                                if (input) input.focus();
+                            }
+                        });
+                    } else {
+                        bd.style.opacity = '0';
+                        panel.style.transform = (window.innerWidth < 768) ? 'translateY(100%)' : 'translate(-50%, 0)';
+                        setTimeout(() => modal.classList.add('hidden'), 300);
+                    }
+                }
+
+                // --- PWA INSTALLATION ---
+                checkInstall() {
+                    // Check if already installed (standalone mode)
+                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+                    // STRICT: Only show if we have a native prompt (Android/Desktop)
+                    // This hides it on iOS where native install isn't supported via button
+                    if (!isStandalone && this.deferredPrompt) {
+                        // Check if dismissed previously in session
+                        if (!sessionStorage.getItem('banner_dismissed')) {
+                            // Show banner
+                            const banner = document.getElementById('install-banner');
+                            if (banner) banner.classList.remove('-translate-y-full'); // slide down
+                        }
+                    }
+                }
+
+                dismissBanner() {
+                    const banner = document.getElementById('install-banner');
+                    if (banner) banner.classList.add('-translate-y-full'); // slide up
+                    sessionStorage.setItem('banner_dismissed', 'true');
+                }
+
+                async installApp() {
+                    if (this.deferredPrompt) {
+                        // Trigger Native Prompt
+                        this.deferredPrompt.prompt();
+                        const { outcome } = await this.deferredPrompt.userChoice;
+                        console.log(`User response to the install prompt: ${outcome}`);
+                        this.deferredPrompt = null;
+                        if (outcome === 'accepted') {
+                            this.dismissBanner();
+                        }
+                    } else {
+                        this.showToast("Installation not supported/available", "info");
+                    }
+                }
+
+                async loadHistory() {
+                    const container = document.getElementById('history-content');
+                    container.innerHTML = '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-circle-notch animate-spin text-2xl"></i></div>';
+
+                    if (!this.state.room) return;
+
+                    try {
+                        const data = [];
+                        // Fetch Messages (Broadcasts)
+                        const mSnap = await get(ref(this.db, `chats/${this.state.room}/messages`));
+                        if (mSnap.exists()) {
+                            mSnap.forEach(s => {
+                                data.push({ ...s.val(), type: 'broadcast', ts: s.key });
+                            });
+                        }
+
+                        // Fetch Questions
+                        const qSnap = await get(ref(this.db, `chats/${this.state.room}/questions`));
+                        if (qSnap.exists()) {
+                            qSnap.forEach(s => {
+                                data.push({ ...s.val(), type: 'question', ts: s.key });
+                            });
+                        }
+
+                        // Sort by timestamp
+                        data.sort((a, b) => b.ts.localeCompare(a.ts));
+
+                        if (data.length === 0) {
+                            container.innerHTML = '<div class="text-center py-20 opacity-30"><p class="text-sm font-bold">No history available</p></div>';
+                            return;
+                        }
+
+                        container.innerHTML = '';
+                        for (const item of data) {
+                            if (this.state.role === 'student') {
+                                if (item.type === 'broadcast') {
+                                    const trans = await this.translateText(item.text, item.lang, this.state.lang);
+                                    this.renderHistoryItem(container, trans, item.text, 'Teacher', 'broadcast');
+                                }
                             } else {
-                                const trans = await this.translateText(item.text, item.lang, this.state.lang);
-                                this.renderHistoryItem(container, trans, item.text, item.senderName, 'question');
+                                if (item.type === 'broadcast') {
+                                    this.renderHistoryItem(container, item.text, item.text, 'You', 'broadcast');
+                                } else {
+                                    const trans = await this.translateText(item.text, item.lang, this.state.lang);
+                                    this.renderHistoryItem(container, trans, item.text, item.senderName, 'question');
+                                }
                             }
                         }
+                    } catch (e) {
+                        container.innerHTML = `<p class="text-center text-red-500 text-xs py-10">Error loading history: ${e.message}</p>`;
                     }
-                } catch (e) {
-                    container.innerHTML = `<p class="text-center text-red-500 text-xs py-10">Error loading history: ${e.message}</p>`;
                 }
-            }
 
-            renderHistoryItem(container, text, original, sender, type) {
-                const div = document.createElement('div');
-                const isBroadcast = type === 'broadcast';
-                div.className = `p-4 rounded-2xl border ${isBroadcast ? 'bg-white border-gray-100' : 'bg-blue-50/50 border-blue-100'} animate-slide-up`;
-                div.innerHTML = `
+                renderHistoryItem(container, text, original, sender, type) {
+                    const div = document.createElement('div');
+                    const isBroadcast = type === 'broadcast';
+                    div.className = `p-4 rounded-2xl border ${isBroadcast ? 'bg-white border-gray-100' : 'bg-blue-50/50 border-blue-100'} animate-slide-up`;
+                    div.innerHTML = `
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-[9px] font-black uppercase tracking-tighter ${isBroadcast ? 'text-gray-400' : 'text-blue-500'}">${sender} • ${isBroadcast ? 'Broadcast' : 'Question'}</span>
                     </div>
                     <p class="text-sm font-semibold text-gray-800 leading-snug">${text}</p>
                     <p class="text-[10px] text-gray-400 italic mt-1 truncate">${original}</p>
                 `;
-                container.appendChild(div);
-            }
-
-            showToast(msg, type = 'info') {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                const colors = { info: 'bg-gray-800 text-white', success: 'bg-green-600 text-white', error: 'bg-red-500 text-white' };
-                toast.className = `${colors[type]} px-4 py-2 rounded-lg shadow-xl text-sm font-semibold transform transition-all duration-300 translate-y-[-20px] opacity-0 flex items-center gap-2`;
-                toast.innerHTML = type === 'success' ? `<i class="fa-solid fa-check-circle"></i> ${msg}` : msg;
-                container.appendChild(toast);
-                requestAnimationFrame(() => toast.classList.remove('translate-y-[-20px]', 'opacity-0'));
-                setTimeout(() => {
-                    toast.classList.add('opacity-0', 'translate-y-[-10px]');
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
-            }
-
-            // --- AUTH ---
-            toggleTeacherMode(show) {
-                const sForm = document.getElementById('form-student');
-                const tForm = document.getElementById('form-teacher');
-                const footer = document.getElementById('login-footer');
-
-                if (show) {
-                    sForm.classList.add('hidden');
-                    footer.classList.add('hidden');
-                    tForm.classList.remove('hidden');
-                } else {
-                    tForm.classList.add('hidden');
-                    sForm.classList.remove('hidden');
-                    footer.classList.remove('hidden');
+                    container.appendChild(div);
                 }
-            }
 
-            handleLogin() { // Student
-                const code = document.getElementById('login-code').value.toUpperCase();
-                const name = document.getElementById('login-name').value;
-                if (!code || !name) return this.showToast("Please enter room and name", "error");
+                showToast(msg, type = 'info') {
+                    const container = document.getElementById('toast-container');
+                    const toast = document.createElement('div');
+                    const colors = { info: 'bg-gray-800 text-white', success: 'bg-green-600 text-white', error: 'bg-red-500 text-white' };
+                    toast.className = `${colors[type]} px-4 py-2 rounded-lg shadow-xl text-sm font-semibold transform transition-all duration-300 translate-y-[-20px] opacity-0 flex items-center gap-2`;
+                    toast.innerHTML = type === 'success' ? `<i class="fa-solid fa-check-circle"></i> ${msg}` : msg;
+                    container.appendChild(toast);
+                    requestAnimationFrame(() => toast.classList.remove('translate-y-[-20px]', 'opacity-0'));
+                    setTimeout(() => {
+                        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                        setTimeout(() => toast.remove(), 300);
+                    }, 3000);
+                }
 
-                this.state = {
-                    ...this.state,
-                    role: 'student',
-                    room: code,
-                    name: name,
-                    lang: document.getElementById('login-lang').value
-                };
+                // --- AUTH ---
+                toggleTeacherMode(show) {
+                    const sForm = document.getElementById('form-student');
+                    const tForm = document.getElementById('form-teacher');
+                    const footer = document.getElementById('login-footer');
 
-                this.requestPermissions();
-                this.initStudent();
-                this.switchView('view-student');
-            }
+                    if (show) {
+                        sForm.classList.add('hidden');
+                        footer.classList.add('hidden');
+                        tForm.classList.remove('hidden');
+                    } else {
+                        tForm.classList.add('hidden');
+                        sForm.classList.remove('hidden');
+                        footer.classList.remove('hidden');
+                    }
+                }
 
-            handleTeacherLogin() {
-                const email = document.getElementById('teacher-email').value;
-                const pw = document.getElementById('teacher-pw').value;
-                const lang = document.getElementById('teacher-lang').value;
+                handleLogin() { // Student
+                    const code = document.getElementById('login-code').value.toUpperCase();
+                    const name = document.getElementById('login-name').value;
+                    if (!code || !name) return this.showToast("Please enter room and name", "error");
 
-                if (email === "teacher@adahconnect.com" && pw === "teacher456321") {
-                    // Generate Room Code
-                    const roomCode = "RM" + Math.floor(1000 + Math.random() * 9000);
-                    this.state = { ...this.state, role: 'teacher', room: roomCode, name: 'Teacher', lang };
+                    this.state = {
+                        ...this.state,
+                        role: 'student',
+                        room: code,
+                        name: name,
+                        lang: document.getElementById('login-lang').value
+                    };
 
                     this.requestPermissions();
-                    document.getElementById('lobby-code').innerText = roomCode;
-                    this.switchView('view-lobby');
-                    this.showToast("Logged in successfully", "success");
-                } else {
-                    this.showToast("Invalid Credentials", "error");
-                }
-            }
-
-            startSession() {
-                this.initTeacher();
-                this.switchView('view-teacher');
-            }
-
-            logout() {
-                if (this.state.isMicActive) this.toggleMic();
-
-                // Detach listeners
-                if (this.state.room) {
-                    const roomRef = ref(this.db, `chats/${this.state.room}`);
-                    // Note: In real app use off(), but with modular SDK we just let garbage collection handle or use unsubscribe
+                    this.initStudent();
+                    this.switchView('view-student');
                 }
 
-                this.clearState();
-                this.state.role = null;
-                this.state.room = '';
-                this.state.name = '';
+                handleTeacherLogin() {
+                    const email = document.getElementById('teacher-email').value;
+                    const pw = document.getElementById('teacher-pw').value;
+                    const lang = document.getElementById('teacher-lang').value;
 
-                // Reset Forms
-                this.toggleTeacherMode(false);
-                this.switchView('view-login');
-            }
+                    if (email === "teacher@adahconnect.com" && pw === "teacher456321") {
+                        // Generate Room Code
+                        const roomCode = "RM" + Math.floor(1000 + Math.random() * 9000);
+                        this.state = { ...this.state, role: 'teacher', room: roomCode, name: 'Teacher', lang };
 
-            // --- STUDENT LOGIC ---
-            initStudent() {
-                this.speakManager.init();
-                document.getElementById('student-name-display').innerText = this.state.name;
-                document.getElementById('student-room-code').innerText = this.state.room;
-                const badge = document.getElementById('student-lang-badge');
-                badge.innerText = this.state.lang.toUpperCase();
-
-                const msgsRef = ref(this.db, `chats/${this.state.room}/messages`);
-                onChildAdded(msgsRef, async (snap) => {
-                    if (this.state.role !== 'student') return;
-                    const msg = snap.val();
-                    if (!msg) return;
-
-                    // Translate
-                    const translated = await this.translateText(msg.text, msg.lang, this.state.lang);
-
-                    // Render
-                    this.renderMessageBubble(translated, msg.text, msg.senderName);
-
-                    // TTS Queue - ONLY FOR STUDENTS HEARING TEACHER
-                    if (this.state.isTTSActive && msg.senderId !== this.state.name) {
-                        if (msg.ssml && msg.lang === this.state.lang) {
-                            // If we have SSML and language matches, use it directly
-                            this.queueAudio(msg.ssml, msg.gender || 'Female', { isSSML: true });
-                        } else {
-                            this.queueAudio(translated, msg.gender || 'Female');
-                        }
-                    }
-                });
-            }
-
-            toggleTTS() {
-                this.state.isTTSActive = !this.state.isTTSActive;
-
-                // Update Student UI
-                const sIcon = document.getElementById('tts-icon');
-                const sBtn = document.getElementById('tts-btn');
-
-                // Update Teacher UI
-                const tIcon = document.getElementById('teacher-tts-icon');
-                const tBtn = document.getElementById('teacher-tts-btn');
-
-                const updateUI = (icon, btn) => {
-                    if (!icon || !btn) return;
-                    if (this.state.isTTSActive) {
-                        icon.className = "fa-solid fa-volume-high";
-                        btn.classList.add('text-blue-500');
+                        this.requestPermissions();
+                        document.getElementById('lobby-code').innerText = roomCode;
+                        this.switchView('view-lobby');
+                        this.showToast("Logged in successfully", "success");
                     } else {
-                        icon.className = "fa-solid fa-volume-xmark";
-                        btn.classList.remove('text-blue-500');
+                        this.showToast("Invalid Credentials", "error");
                     }
-                };
-
-                updateUI(sIcon, sBtn);
-                updateUI(tIcon, tBtn);
-
-                if (this.state.isTTSActive) {
-                    this.processAudioQueue();
-                    this.showToast("Voice Output Enabled", "success");
-                } else {
-                    this.showToast("Voice Output Muted", "info");
                 }
-            }
 
-            queueAudio(text, gender, options = {}) {
-                this.state.audioQueue.push({ text, gender, ...options });
-                if (!this.state.isAudioPlaying) this.processAudioQueue();
-            }
+                startSession() {
+                    this.initTeacher();
+                    this.switchView('view-teacher');
+                }
 
-            async processAudioQueue() {
-                if (this.state.isAudioPlaying || this.state.audioQueue.length === 0) return;
-                this.state.isAudioPlaying = true;
-                const item = this.state.audioQueue.shift();
-                const voiceId = this.getVoiceIdForLanguage(this.state.lang);
+                logout() {
+                    if (this.state.isMicActive) this.toggleMic();
 
-                try {
-                    // Prepare transcript: wrap in speak if isSSML and not already wrapped
-                    let transcript = item.text;
-                    if (item.isSSML) {
-                        if (!transcript.trim().startsWith('<speak')) {
-                            transcript = `<speak>${transcript}</speak>`;
-                        }
-                    } else {
-                        // Standard humanization for text
-                        transcript = `<emotion value="neutral" />${transcript}`;
+                    // Detach listeners
+                    if (this.state.room) {
+                        const roomRef = ref(this.db, `chats/${this.state.room}`);
+                        // Note: In real app use off(), but with modular SDK we just let garbage collection handle or use unsubscribe
                     }
 
-                    const res = await fetch("https://api.cartesia.ai/tts/bytes", {
-                        method: "POST",
-                        headers: {
-                            "Cartesia-Version": "2025-04-16",
-                            "X-API-Key": CREDENTIALS.CARTESIA,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            "model_id": "sonic-3-latest",
-                            "transcript": transcript,
-                            "voice": { "mode": "id", "id": voiceId },
-                            "output_format": {
-                                "container": "wav",
-                                "encoding": "pcm_f32le",
-                                "sample_rate": 44100
+                    this.clearState();
+                    this.state.role = null;
+                    this.state.room = '';
+                    this.state.name = '';
+
+                    // Reset Forms
+                    this.toggleTeacherMode(false);
+                    this.switchView('view-login');
+                }
+
+                // --- STUDENT LOGIC ---
+                initStudent() {
+                    this.speakManager.init();
+                    document.getElementById('student-name-display').innerText = this.state.name;
+                    document.getElementById('student-room-code').innerText = this.state.room;
+                    const badge = document.getElementById('student-lang-badge');
+                    badge.innerText = this.state.lang.toUpperCase();
+
+                    const msgsRef = ref(this.db, `chats/${this.state.room}/messages`);
+                    onChildAdded(msgsRef, async (snap) => {
+                        if (this.state.role !== 'student') return;
+                        const msg = snap.val();
+                        if (!msg) return;
+
+                        // Translate
+                        const translated = await this.translateText(msg.text, msg.lang, this.state.lang);
+
+                        // Render
+                        this.renderMessageBubble(translated, msg.text, msg.senderName);
+
+                        // TTS Queue - ONLY FOR STUDENTS HEARING TEACHER
+                        if (this.state.isTTSActive && msg.senderId !== this.state.name) {
+                            if (msg.ssml && msg.lang === this.state.lang) {
+                                // If we have SSML and language matches, use it directly
+                                this.queueAudio(msg.ssml, msg.gender || 'Female', { isSSML: true });
+                            } else {
+                                this.queueAudio(translated, msg.gender || 'Female');
                             }
-                        })
+                        }
                     });
+                }
 
-                    if (res.ok) {
-                        const blob = await res.blob();
-                        const url = URL.createObjectURL(blob);
-                        const audio = new Audio(url);
-                        audio.playbackRate = this.state.ttsSpeed; // Set speed for low latency
-                        audio.onended = () => {
-                            this.state.isAudioPlaying = false;
-                            this.processAudioQueue();
-                        };
-                        audio.play();
+                toggleTTS() {
+                    this.state.isTTSActive = !this.state.isTTSActive;
+
+                    // Update Student UI
+                    const sIcon = document.getElementById('tts-icon');
+                    const sBtn = document.getElementById('tts-btn');
+
+                    // Update Teacher UI
+                    const tIcon = document.getElementById('teacher-tts-icon');
+                    const tBtn = document.getElementById('teacher-tts-btn');
+
+                    const updateUI = (icon, btn) => {
+                        if (!icon || !btn) return;
+                        if (this.state.isTTSActive) {
+                            icon.className = "fa-solid fa-volume-high";
+                            btn.classList.add('text-blue-500');
+                        } else {
+                            icon.className = "fa-solid fa-volume-xmark";
+                            btn.classList.remove('text-blue-500');
+                        }
+                    };
+
+                    updateUI(sIcon, sBtn);
+                    updateUI(tIcon, tBtn);
+
+                    if (this.state.isTTSActive) {
+                        this.processAudioQueue();
+                        this.showToast("Voice Output Enabled", "success");
                     } else {
-                        console.warn("TTS failed for language:", lang, "using voice:", voiceId);
-                        // Fallback to English voice with faster playback
-                        let fallbackTranscript = item.text;
+                        this.showToast("Voice Output Muted", "info");
+                    }
+                }
+
+                queueAudio(text, gender, options = {}) {
+                    this.state.audioQueue.push({ text, gender, ...options });
+                    if (!this.state.isAudioPlaying) this.processAudioQueue();
+                }
+
+                async processAudioQueue() {
+                    if (this.state.isAudioPlaying || this.state.audioQueue.length === 0) return;
+                    this.state.isAudioPlaying = true;
+                    const item = this.state.audioQueue.shift();
+                    const voiceId = this.getVoiceIdForLanguage(this.state.lang);
+
+                    try {
+                        // Prepare transcript: wrap in speak if isSSML and not already wrapped
+                        let transcript = item.text;
                         if (item.isSSML) {
-                            if (!fallbackTranscript.trim().startsWith('<speak')) {
-                                fallbackTranscript = `<speak>${fallbackTranscript}</speak>`;
+                            if (!transcript.trim().startsWith('<speak')) {
+                                transcript = `<speak>${transcript}</speak>`;
                             }
                         } else {
-                            fallbackTranscript = `<emotion value="neutral" />${fallbackTranscript}`;
+                            // Standard humanization for text
+                            transcript = `<emotion value="neutral" />${transcript}`;
                         }
 
-                        const fallbackRes = await fetch("https://api.cartesia.ai/tts/bytes", {
+                        const res = await fetch("https://api.cartesia.ai/tts/bytes", {
                             method: "POST",
                             headers: {
                                 "Cartesia-Version": "2025-04-16",
@@ -1252,8 +1248,8 @@
                             },
                             body: JSON.stringify({
                                 "model_id": "sonic-3-latest",
-                                "transcript": fallbackTranscript,
-                                "voice": { "mode": "id", "id": CREDENTIALS.CARTESIA_VOICES["default"] },
+                                "transcript": transcript,
+                                "voice": { "mode": "id", "id": voiceId },
                                 "output_format": {
                                     "container": "wav",
                                     "encoding": "pcm_f32le",
@@ -1262,253 +1258,301 @@
                             })
                         });
 
-                        if (fallbackRes.ok) {
-                            const fallbackBlob = await fallbackRes.blob();
-                            const fallbackUrl = URL.createObjectURL(fallbackBlob);
-                            const fallbackAudio = new Audio(fallbackUrl);
-                            fallbackAudio.playbackRate = this.state.ttsSpeed; // Faster playback for latency
-                            fallbackAudio.onended = () => {
+                        if (res.ok) {
+                            const blob = await res.blob();
+                            const url = URL.createObjectURL(blob);
+                            const audio = new Audio(url);
+                            audio.playbackRate = this.state.ttsSpeed; // Set speed for low latency
+                            audio.onended = () => {
                                 this.state.isAudioPlaying = false;
                                 this.processAudioQueue();
                             };
-                            fallbackAudio.play();
+                            audio.play();
                         } else {
-                            this.state.isAudioPlaying = false;
+                            console.warn("TTS failed for language:", lang, "using voice:", voiceId);
+                            // Fallback to English voice with faster playback
+                            let fallbackTranscript = item.text;
+                            if (item.isSSML) {
+                                if (!fallbackTranscript.trim().startsWith('<speak')) {
+                                    fallbackTranscript = `<speak>${fallbackTranscript}</speak>`;
+                                }
+                            } else {
+                                fallbackTranscript = `<emotion value="neutral" />${fallbackTranscript}`;
+                            }
+
+                            const fallbackRes = await fetch("https://api.cartesia.ai/tts/bytes", {
+                                method: "POST",
+                                headers: {
+                                    "Cartesia-Version": "2025-04-16",
+                                    "X-API-Key": CREDENTIALS.CARTESIA,
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    "model_id": "sonic-3-latest",
+                                    "transcript": fallbackTranscript,
+                                    "voice": { "mode": "id", "id": CREDENTIALS.CARTESIA_VOICES["default"] },
+                                    "output_format": {
+                                        "container": "wav",
+                                        "encoding": "pcm_f32le",
+                                        "sample_rate": 44100
+                                    }
+                                })
+                            });
+
+                            if (fallbackRes.ok) {
+                                const fallbackBlob = await fallbackRes.blob();
+                                const fallbackUrl = URL.createObjectURL(fallbackBlob);
+                                const fallbackAudio = new Audio(fallbackUrl);
+                                fallbackAudio.playbackRate = this.state.ttsSpeed; // Faster playback for latency
+                                fallbackAudio.onended = () => {
+                                    this.state.isAudioPlaying = false;
+                                    this.processAudioQueue();
+                                };
+                                fallbackAudio.play();
+                            } else {
+                                this.state.isAudioPlaying = false;
+                            }
                         }
+                    } catch (e) {
+                        console.error("TTS Error", e);
+                        this.state.isAudioPlaying = false;
                     }
-                } catch (e) {
-                    console.error("TTS Error", e);
-                    this.state.isAudioPlaying = false;
-                }
-            }
-
-            getVoiceIdForLanguage(langCode) {
-                // Direct mapping for specific languages
-                if (CREDENTIALS.CARTESIA_VOICES[langCode]) {
-                    return CREDENTIALS.CARTESIA_VOICES[langCode];
                 }
 
-                // Try base language code
-                const baseLang = langCode.split('-')[0];
-                if (CREDENTIALS.CARTESIA_VOICES[baseLang]) {
-                    return CREDENTIALS.CARTESIA_VOICES[baseLang];
+                getVoiceIdForLanguage(langCode) {
+                    // Direct mapping for specific languages
+                    if (CREDENTIALS.CARTESIA_VOICES[langCode]) {
+                        return CREDENTIALS.CARTESIA_VOICES[langCode];
+                    }
+
+                    // Try base language code
+                    const baseLang = langCode.split('-')[0];
+                    if (CREDENTIALS.CARTESIA_VOICES[baseLang]) {
+                        return CREDENTIALS.CARTESIA_VOICES[baseLang];
+                    }
+
+                    // Default fallback
+                    return CREDENTIALS.CARTESIA_VOICES["default"];
                 }
 
-                // Default fallback
-                return CREDENTIALS.CARTESIA_VOICES["default"];
-            }
-
-            renderMessageBubble(text, original, sender) {
-                const stream = document.getElementById('student-stream');
-                const bubble = document.createElement('div');
-                bubble.className = "message-bubble bg-white p-4 rounded-2xl rounded-tl-none border border-gray-100 mb-4 animate-slide-up max-w-[90%]";
-                bubble.innerHTML = `
+                renderMessageBubble(text, original, sender) {
+                    const stream = document.getElementById('student-stream');
+                    const bubble = document.createElement('div');
+                    bubble.className = "message-bubble bg-white p-4 rounded-2xl rounded-tl-none border border-gray-100 mb-4 animate-slide-up max-w-[90%]";
+                    bubble.innerHTML = `
                     <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">${sender}</p>
                     <p class="text-lg font-medium text-gray-800 leading-snug">${text}</p>
                     <div class="border-t border-gray-100 mt-2 pt-1">
                         <p class="text-xs text-gray-400 italic truncate">${original}</p>
                     </div>
                 `;
-                stream.appendChild(bubble);
-                stream.scrollTop = stream.scrollHeight;
-            }
+                    stream.appendChild(bubble);
+                    stream.scrollTop = stream.scrollHeight;
+                }
 
-            // --- TEACHER LOGIC (DEEPGRAM) ---
-            initTeacher() {
-                this.speakManager.init();
-                document.getElementById('teacher-code-display').innerText = this.state.room;
+                // --- TEACHER LOGIC (DEEPGRAM) ---
+                initTeacher() {
+                    this.speakManager.init();
+                    document.getElementById('teacher-code-display').innerText = this.state.room;
 
-                // Questions Listener
-                const qRef = ref(this.db, `chats/${this.state.room}/questions`);
-                onChildAdded(qRef, async (snap) => {
-                    if (this.state.role !== 'teacher') return;
-                    const q = snap.val();
-                    if (!q) return;
+                    // Questions Listener
+                    const qRef = ref(this.db, `chats/${this.state.room}/questions`);
+                    onChildAdded(qRef, async (snap) => {
+                        if (this.state.role !== 'teacher') return;
+                        const q = snap.val();
+                        if (!q) return;
 
-                    const trans = await this.translateText(q.text, q.lang, this.state.lang);
-                    this.renderQuestion(trans, q.text, q.senderName);
+                        const trans = await this.translateText(q.text, q.lang, this.state.lang);
+                        this.renderQuestion(trans, q.text, q.senderName);
 
-                    // TEACHER TTS
-                    if (this.state.isTTSActive) {
-                        this.queueAudio(trans, 'Female');
-                    }
-                });
-            }
+                        // TEACHER TTS
+                        if (this.state.isTTSActive) {
+                            this.queueAudio(trans, 'Female');
+                        }
+                    });
+                }
 
-            renderQuestion(text, original, sender) {
-                const list = document.getElementById('teacher-questions');
-                const card = document.createElement('div');
-                card.className = "bg-white border border-blue-100 p-3 rounded-xl shadow-sm animate-slide-up cursor-pointer hover:border-blue-300 transition-colors";
-                card.innerHTML = `
+                renderQuestion(text, original, sender) {
+                    const list = document.getElementById('teacher-questions');
+                    const card = document.createElement('div');
+                    card.className = "bg-white border border-blue-100 p-3 rounded-xl shadow-sm animate-slide-up cursor-pointer hover:border-blue-300 transition-colors";
+                    card.innerHTML = `
                     <div class="flex justify-between items-start mb-1">
                         <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase">${sender}</span>
                     </div>
                     <p class="text-sm font-semibold text-gray-800 leading-snug">${text}</p>
                     <p class="text-xs text-gray-400 italic mt-1 truncate">${original}</p>
                 `;
-                list.prepend(card);
+                    list.prepend(card);
 
-                const count = document.getElementById('question-count');
-                count.innerText = parseInt(count.innerText) + 1;
-            }
+                    const count = document.getElementById('question-count');
+                    count.innerText = parseInt(count.innerText) + 1;
+                }
 
-            async toggleMic() {
-                if (this.state.isMicActive) {
-                    // STOP
-                    this.stopDeepgram();
-                    this.state.isMicActive = false;
-                    this.updateMicUI(false);
-                } else {
-                    // START
-                    try {
-                        await this.startDeepgram();
-                        this.state.isMicActive = true;
-                        this.updateMicUI(true);
-                        this.showToast("Broadcasting Live", "success");
-                    } catch (e) {
-                        console.error("Mic Error", e);
-                        this.showToast("Microphone Error: " + e.message, "error");
+                async toggleMic() {
+                    if (this.state.isMicActive) {
+                        // STOP
+                        this.stopDeepgram();
                         this.state.isMicActive = false;
                         this.updateMicUI(false);
+                    } else {
+                        // START
+                        try {
+                            await this.startDeepgram();
+                            this.state.isMicActive = true;
+                            this.updateMicUI(true);
+                            this.showToast("Broadcasting Live", "success");
+                        } catch (e) {
+                            console.error("Mic Error", e);
+                            this.showToast("Microphone Error: " + e.message, "error");
+                            this.state.isMicActive = false;
+                            this.updateMicUI(false);
+                        }
                     }
                 }
-            }
 
-            async startDeepgram() {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-                // Wake Lock
-                if ('wakeLock' in navigator) {
-                    try { this.wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { }
-                }
-
-                this.speakManager.init();
-                this.dgClient = createClient(CREDENTIALS.DEEPGRAM);
-                this.dgSocket = this.dgClient.listen.live({
-                    model: "nova-3",
-                    language: this.state.lang.split('-')[0], // Handle en-US etc
-                    smart_format: true,
-                    interim_results: true,
-                    endpointing: 250, // Ultra-fast endpointing for low latency
-                    utterance_end_ms: 1000
-                });
-
-                this.dgSocket.on(LiveTranscriptionEvents.Open, () => {
-                    this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-                    this.mediaRecorder.ondataavailable = (e) => {
-                        if (e.data.size > 0 && this.dgSocket.getReadyState() === 1) {
-                            this.dgSocket.send(e.data);
+                async startDeepgram() {
+                    const micConstraints = {
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
                         }
                     };
-                    this.mediaRecorder.start(250); // Small chunks for low latency
-                });
+                    const stream = await navigator.mediaDevices.getUserMedia(micConstraints);
 
-                this.dgSocket.on(LiveTranscriptionEvents.Transcript, (data) => {
-                    const transcript = data.channel.alternatives[0].transcript;
-                    if (transcript && data.is_final) {
-                        this.broadcastMessage(transcript);
+                    // Wake Lock
+                    if ('wakeLock' in navigator) {
+                        try { this.wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { }
                     }
 
-                    // Live UI Update
-                    const ui = document.getElementById('teacher-transcript');
-                    if (transcript) ui.innerText = transcript;
-                });
-            }
+                    this.speakManager.init();
+                    this.dgClient = createClient(CREDENTIALS.DEEPGRAM);
+                    this.dgSocket = this.dgClient.listen.live({
+                        model: "nova-3",
+                        language: this.state.lang.split('-')[0], // Handle en-US etc
+                        smart_format: true,
+                        interim_results: true,
+                        endpointing: 250, // Ultra-fast endpointing for low latency
+                        utterance_end_ms: 1000
+                    });
 
-            stopDeepgram() {
-                if (this.mediaRecorder) this.mediaRecorder.stop();
-                if (this.dgSocket) this.dgSocket.finish();
-                if (this.wakeLock) this.wakeLock.release();
+                    this.dgSocket.on(LiveTranscriptionEvents.Open, () => {
+                        this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                        this.mediaRecorder.ondataavailable = (e) => {
+                            if (e.data.size > 0 && this.dgSocket.getReadyState() === 1) {
+                                this.dgSocket.send(e.data);
+                            }
+                        };
+                        this.mediaRecorder.start(250); // Small chunks for low latency
+                    });
 
-                this.mediaRecorder = null;
-                this.dgSocket = null;
-            }
+                    this.dgSocket.on(LiveTranscriptionEvents.Transcript, (data) => {
+                        const transcript = data.channel.alternatives[0].transcript;
+                        if (transcript && data.is_final) {
+                            this.broadcastMessage(transcript);
+                        }
 
-            updateMicUI(active) {
-                const btn = document.getElementById('mic-btn');
-                const bars = document.querySelectorAll('#mic-status div');
+                        // Live UI Update
+                        const ui = document.getElementById('teacher-transcript');
+                        if (transcript) ui.innerText = transcript;
+                    });
+                }
 
-                if (active) {
-                    btn.classList.add('bg-red-500', 'text-white', 'mic-active-ring');
-                    btn.classList.remove('bg-gray-100', 'text-gray-600');
-                    btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
-                    bars.forEach(b => b.classList.add('bg-red-400'));
-                } else {
-                    btn.classList.remove('bg-red-500', 'text-white', 'mic-active-ring');
-                    btn.classList.add('bg-gray-100', 'text-gray-600');
-                    btn.innerHTML = '<i class="fa-solid fa-microphone-slash text-sm"></i>';
-                    bars.forEach(b => b.classList.remove('bg-red-400'));
+                stopDeepgram() {
+                    if (this.mediaRecorder) this.mediaRecorder.stop();
+                    if (this.dgSocket) this.dgSocket.finish();
+                    if (this.wakeLock) this.wakeLock.release();
+
+                    this.mediaRecorder = null;
+                    this.dgSocket = null;
+                }
+
+                updateMicUI(active) {
+                    const btn = document.getElementById('mic-btn');
+                    const bars = document.querySelectorAll('#mic-status div');
+
+                    if (active) {
+                        btn.classList.add('bg-red-500', 'text-white', 'mic-active-ring');
+                        btn.classList.remove('bg-gray-100', 'text-gray-600');
+                        btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                        bars.forEach(b => b.classList.add('bg-red-400'));
+                    } else {
+                        btn.classList.remove('bg-red-500', 'text-white', 'mic-active-ring');
+                        btn.classList.add('bg-gray-100', 'text-gray-600');
+                        btn.innerHTML = '<i class="fa-solid fa-microphone-slash text-sm"></i>';
+                        bars.forEach(b => b.classList.remove('bg-red-400'));
+                    }
+                }
+
+                broadcastMessage(text) {
+                    push(ref(this.db, `chats/${this.state.room}/messages`), {
+                        text: text,
+                        lang: this.state.lang,
+                        senderName: this.state.name,
+                        senderId: this.state.name, // Simple ID for now
+                        gender: this.state.gender,
+                        timestamp: Date.now()
+                    });
+                }
+
+                // --- UTILS ---
+
+
+                sendQuestion() {
+                    const val = document.getElementById('q-input').value.trim();
+                    if (!val) return;
+
+                    push(ref(this.db, `chats/${this.state.room}/questions`), {
+                        text: val,
+                        lang: this.state.lang,
+                        senderName: this.state.name,
+                        timestamp: Date.now()
+                    });
+
+                    document.getElementById('q-input').value = '';
+                    this.toggleModal('question');
+                    this.showToast("Question Sent", "success");
+                }
+
+                sendReaction(emoji) {
+                    this.showToast(`Sent ${emoji}`, "success");
+                    const float = document.createElement('div');
+                    float.innerText = emoji;
+                    float.className = 'fixed bottom-20 left-1/2 text-4xl pointer-events-none animate-bounce z-50';
+                    float.style.transition = 'all 1s ease-out';
+                    document.body.appendChild(float);
+                    setTimeout(() => {
+                        float.style.transform = 'translateY(-200px) scale(0)';
+                        float.style.opacity = '0';
+                        setTimeout(() => float.remove(), 1000);
+                    }, 50);
+                }
+
+                async translateText(text, source, target) {
+                    if (source === target) return text;
+                    try {
+                        // For regional codes, use base language code for translation
+                        const sourceBase = source.split('-')[0];
+                        const targetBase = target.split('-')[0];
+
+                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceBase}&tl=${targetBase}&dt=t&q=${encodeURIComponent(text)}`);
+                        const json = await res.json();
+                        return json[0][0][0];
+                    } catch (e) {
+                        console.warn("Translation error:", e);
+                        return text;
+                    }
+                }
+
+                copyCode() {
+                    navigator.clipboard.writeText(this.state.room);
+                    this.showToast("Copied to clipboard", "success");
                 }
             }
 
-            broadcastMessage(text) {
-                push(ref(this.db, `chats/${this.state.room}/messages`), {
-                    text: text,
-                    lang: this.state.lang,
-                    senderName: this.state.name,
-                    senderId: this.state.name, // Simple ID for now
-                    gender: this.state.gender,
-                    timestamp: Date.now()
-                });
-            }
-
-            // --- UTILS ---
-
-
-            sendQuestion() {
-                const val = document.getElementById('q-input').value.trim();
-                if (!val) return;
-
-                push(ref(this.db, `chats/${this.state.room}/questions`), {
-                    text: val,
-                    lang: this.state.lang,
-                    senderName: this.state.name,
-                    timestamp: Date.now()
-                });
-
-                document.getElementById('q-input').value = '';
-                this.toggleModal('question');
-                this.showToast("Question Sent", "success");
-            }
-
-            sendReaction(emoji) {
-                this.showToast(`Sent ${emoji}`, "success");
-                const float = document.createElement('div');
-                float.innerText = emoji;
-                float.className = 'fixed bottom-20 left-1/2 text-4xl pointer-events-none animate-bounce z-50';
-                float.style.transition = 'all 1s ease-out';
-                document.body.appendChild(float);
-                setTimeout(() => {
-                    float.style.transform = 'translateY(-200px) scale(0)';
-                    float.style.opacity = '0';
-                    setTimeout(() => float.remove(), 1000);
-                }, 50);
-            }
-
-            async translateText(text, source, target) {
-                if (source === target) return text;
-                try {
-                    // For regional codes, use base language code for translation
-                    const sourceBase = source.split('-')[0];
-                    const targetBase = target.split('-')[0];
-
-                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceBase}&tl=${targetBase}&dt=t&q=${encodeURIComponent(text)}`);
-                    const json = await res.json();
-                    return json[0][0][0];
-                } catch (e) {
-                    console.warn("Translation error:", e);
-                    return text;
-                }
-            }
-
-            copyCode() {
-                navigator.clipboard.writeText(this.state.room);
-                this.showToast("Copied to clipboard", "success");
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => new SuccesApp());
-    </script>
+            document.addEventListener('DOMContentLoaded', () => new SuccesApp());
+        </script>
 </body>
 
 </html>

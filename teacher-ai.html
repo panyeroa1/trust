@@ -7,22 +7,84 @@
     <title>AI Teacher Generator - Succes Class</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.88);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-blur: blur(16px);
+            --shadow-apple: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
+        body {
+            font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #fbfbfd;
+            height: 100dvh;
+            overflow: hidden;
+            color: #1d1d1f;
+            letter-spacing: -0.022em;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1,
+        h2,
+        h3,
+        .font-black {
+            font-family: "SF Pro Display", "SF Pro Text", -apple-system, sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        .glass-apple {
+            background: var(--glass-bg);
+            -webkit-backdrop-filter: var(--glass-blur);
+            backdrop-filter: var(--glass-blur);
+            border: 0.5px solid var(--glass-border);
+            box-shadow: var(--shadow-apple);
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.8);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .bottom-lift {
+            padding-bottom: calc(25px + env(safe-area-inset-bottom));
+        }
+
+        .input-apple {
+            background: #f5f5f7;
+            border: none;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .input-apple:focus {
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(0, 125, 250, 0.1);
+            outline: none;
+        }
+
+        .btn-apple {
+            border-radius: 14px;
+            font-weight: 510;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .btn-apple:active {
+            transform: scale(0.96);
+            opacity: 0.8;
         }
 
         .animate-slide-up {
-            animation: slideUp 0.5s ease-out;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @keyframes slideUp {
@@ -42,54 +104,91 @@
 <body class="bg-slate-50 min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="h-16 px-6 bg-white border-b border-gray-200 flex justify-between items-center shadow-sm z-30">
-        <div class="flex items-center gap-3">
-            <a href="index.html" title="Back to Dashboard" class="text-gray-400 hover:text-blue-500 transition-colors">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
-            <h1 class="font-bold text-gray-900">AI Teacher Generator</h1>
-        </div>
-        <div class="flex items-center gap-3">
-            <div id="status-badge"
-                class="hidden flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold animate-pulse">
-                <i class="fa-solid fa-brain"></i> TEACHING...
+    <header class="sticky-header h-16 px-6 flex justify-between items-center z-30">
+        <div class="px-2 max-w-7xl mx-auto w-full flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="index.html" title="Back to Dashboard"
+                    class="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all active:scale-95">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </a>
+                <h1 class="font-black text-gray-900 tracking-tight text-sm uppercase">AI Teacher</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="status-badge"
+                    class="hidden flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#0071e3] text-[10px] font-black uppercase tracking-wider animate-pulse">
+                    <i class="fa-solid fa-brain"></i> Teaching
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="flex-1 p-6 max-w-2xl mx-auto w-full">
-        <div class="glass border border-gray-100 rounded-3xl p-8 shadow-xl animate-slide-up">
-            <div class="mb-8">
-                <h2 class="text-2xl font-black text-gray-900 mb-2">Generate a Lesson</h2>
-                <p class="text-sm text-gray-500">Enter a topic and the AI Teacher will start explaining it
-                    sentence-by-sentence to your class.</p>
+    <main class="flex-1 p-6 md:p-12 max-w-full lg:max-w-screen-xl mx-auto w-full flex flex-col">
+        <div
+            class="glass-apple rounded-[32px] md:rounded-[48px] p-8 md:p-12 flex-1 flex flex-col animate-slide-up h-full">
+            <div class="mb-8 md:mb-12">
+                <div class="flex items-center gap-3 mb-2">
+                    <div
+                        class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sm md:text-base"></i>
+                    </div>
+                    <h2 class="text-2xl md:text-4xl font-black text-gray-900 tracking-tight">Generate Lesson</h2>
+                </div>
+                <p class="text-sm md:text-base text-gray-500 font-medium max-w-xl">Explain any topic
+                    sentence-by-sentence to your class with human-like delivery and natural pacing.</p>
             </div>
 
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Subject /
+            <div class="space-y-6 md:space-y-10 flex-1">
+                <div class="max-w-3xl">
+                    <label
+                        class="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Subject /
                         Topic</label>
-                    <textarea id="topic-input" rows="3"
-                        class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-gray-900 outline-none focus:border-purple-500 transition-all placeholder:text-gray-300 resize-none"
-                        placeholder="e.g. The importance of the Roman Empire, or How photosynthesis works..."></textarea>
+
+                    <!-- Presets ScrollView -->
+                    <div class="flex gap-2 mb-3 overflow-x-auto pb-2 custom-scrollbar -mx-1 px-1">
+                        <button onclick="Generator.setTopic('Construction Safety Officer Duties')"
+                            class="whitespace-nowrap px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-full text-sm font-bold transition-colors border border-blue-100/50">
+                            👷 Safety Officer
+                        </button>
+                        <button onclick="Generator.setTopic('Proper Harness Usage & Inspection')"
+                            class="whitespace-nowrap px-4 py-2 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-full text-sm font-bold transition-colors border border-orange-100/50">
+                            🪝 Harness Safety
+                        </button>
+                        <button onclick="Generator.setTopic('Complete PPE Guidelines')"
+                            class="whitespace-nowrap px-4 py-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 rounded-full text-sm font-bold transition-colors border border-yellow-100/50">
+                            ⛑️ PPE Rules
+                        </button>
+                        <button onclick="Generator.setTopic('Identifying Site Hazards')"
+                            class="whitespace-nowrap px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-full text-sm font-bold transition-colors border border-red-100/50">
+                            ⚠️ Site Hazards
+                        </button>
+                        <button onclick="Generator.setTopic('Emergency First Aid Response')"
+                            class="whitespace-nowrap px-4 py-2 bg-green-50 hover:bg-green-100 text-green-600 rounded-full text-sm font-bold transition-colors border border-green-100/50">
+                            🚑 First Aid
+                        </button>
+                    </div>
+
+                    <textarea id="topic-input" rows="4"
+                        class="input-apple w-full px-5 py-4 md:px-7 md:py-6 text-gray-900 outline-none placeholder:text-gray-300 resize-none text-[16px] md:text-[18px]"
+                        placeholder="e.g. How photosynthesis works, or the history of the Roman Empire..."></textarea>
                 </div>
 
-                <div class="flex gap-4">
-                    <button id="start-btn" onclick="Generator.start()"
-                        class="flex-1 bg-gradient-to-br from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-purple-500/20 transition-all active:scale-95 flex items-center justify-center gap-3">
-                        <i class="fa-solid fa-magic"></i> START LESSON
+                <div class="flex gap-4 max-w-3xl">
+                    <button id="start-btn" onclick="Generator.start()" title="Start Lesson"
+                        class="flex-1 btn-apple bg-[#0071e3] hover:bg-[#0077ed] text-white py-4 md:py-5 shadow-lg shadow-blue-500/10 flex items-center justify-center gap-3 text-lg md:text-xl">
+                        <i class="fa-solid fa-play"></i> START
                     </button>
-                    <button id="stop-btn" onclick="Generator.stop()"
-                        class="hidden bg-red-100 hover:bg-red-200 text-red-600 font-bold px-8 rounded-2xl transition-all active:scale-95">
+                    <button id="stop-btn" onclick="Generator.stop()" title="Stop Lesson"
+                        class="hidden btn-apple bg-[#ff3b30] hover:bg-[#ff453a] text-white px-8 py-4 md:py-5 shadow-lg shadow-red-500/10 transition-all text-lg md:text-xl">
                         STOP
                     </button>
                 </div>
-            </div>
 
-            <div id="log" class="mt-8 space-y-3 overflow-y-auto max-h-64 custom-scrollbar">
-                <!-- Log entries -->
+                <div id="log" class="space-y-3 overflow-y-auto max-h-[30vh] md:max-h-[40vh] custom-scrollbar pb-10">
+                    <!-- Log entries -->
+                </div>
             </div>
         </div>
+        <div class="bottom-lift"></div>
     </main>
 
     <script type="module">
@@ -154,6 +253,12 @@
                 }
             },
 
+            setTopic(topic) {
+                const input = document.getElementById('topic-input');
+                input.value = topic;
+                input.focus();
+            },
+
             stop() {
                 this.isActive = false;
                 if (this.interval) clearInterval(this.interval);
@@ -163,14 +268,34 @@
             },
 
             async callAI(topic) {
-                const systemPrompt = `You are an AI Teacher Topic Generator.
+                const systemPrompt = `You are "LiveClass Composer": a well-researched expert teacher who speaks naturally, but writes in a translation-stable way.
 
-CORE IDENTITY
-- You are a real, experienced human teacher speaking naturally.
-- You generate lesson topics AND explain them as if speaking live in class.
-- Your output is designed to be spoken aloud via Cartesia TTS.
-- You DO NOT translate. You DO NOT switch languages.
-- You ALWAYS use the teacher’s selected language as the ONLY output language.
+GOAL
+Generate spoken teaching text for a live class or tutorial based on a structured request. The output must sound human and engaging, yet be easy to translate without meaning drift.
+
+OUTPUT
+Return ONLY raw string of valid SSML (no JSON, no headings, no bullet points, no preamble).
+Use short paragraphs (1–2 sentences each). Keep the cadence like a real teacher.
+
+TRANSLATION-STABLE WRITING RULES (NON-NEGOTIABLE)
+1) NO idioms, NO puns, NO culture-specific sayings, NO metaphors that require interpretation.
+2) Prefer concrete nouns over pronouns (repeat the noun if needed). Avoid unclear “it/they/this/that”.
+3) Keep sentences short (8–18 words). One idea per sentence.
+4) Avoid sarcasm that relies on tone. If humor is used, make it explicit and literal.
+5) Keep technical terms consistent. Do not rename the same concept later.
+6) Keep numbers, units, and proper nouns unchanged.
+7) If you add a joke, it must still be literally correct when translated.
+
+CARTESIA SSML RULES (STRICT & CRITICAL)
+- Output MUST be valid SSML only.
+- Use <break time="300ms"/> to <break time="800ms"/> for natural thinking pauses.
+- Do NOT describe emotions in text — express them through pacing and delivery.
+- Do NOT include explanations about SSML.
+- Do NOT include markdown, code fences, or metadata.
+- Wrap everything in a single <speak> tag.
+- Vary sentence length: some short, some flowing to sound human.
+- Occasionally repeat a word once for realism (e.g., “so, so this part is important”).
+- Use light verbal fillers appropriate to the target language (e.g., “uh”, “um”).
 
 LANGUAGE LOCK (CRITICAL)
 - The variable TEACHER_LANGUAGE defines your language.
@@ -179,36 +304,19 @@ LANGUAGE LOCK (CRITICAL)
 - If TEACHER_LANGUAGE = English, you speak natural conversational English.
 - Never mix languages unless that language itself is mixed.
 
-HUMAN DELIVERY RULES
-You must sound like a real human teacher:
-- Occasionally repeat a word once (e.g., “so, so this part is important”).
-- Use light verbal fillers appropriate to the language (e.g., “uh”, “um”, “euh”, “ah”).
-- Vary sentence length: some short, some flowing.
-- Add natural pacing and thinking pauses.
-- Never sound scripted or robotic.
+STRUCTURE
+1) Hook (2 sentences)
+2) Core explanation (6–10 sentences)
+3) One brief student question moment (literal pattern: "Okay, quick question from a student: <question>.")
+4) Practical example (3–5 sentences)
+5) Wrap-up + invitation for questions (2–3 sentences)
 
-CARTESIA SSML RULES (STRICT)
-- Output MUST be valid SSML only.
-- Use <break time="...ms"/> for pauses (300–900ms).
-- Do NOT describe emotions in text — express them through pacing and delivery.
-- Do NOT include explanations about SSML.
-- Do NOT include markdown, code fences, or metadata.
-- Wrap everything in a single <speak> tag.
+SAFETY / TONE
+Keep it classroom-safe. No explicit sexual content. No self-harm content. No hate. No illegal instructions.
 
-CONTENT RULES
-- Generate an engaging lesson topic relevant to: ${topic}
-- Explain the topic clearly, progressively, and confidently.
-- Assume students are listening live.
-- You may briefly simulate interaction.
-- Do NOT summarize at the end unless explicitly asked.
-
-ABSOLUTE PROHIBITIONS
-- No translation
-- No emojis
-- No bullet lists
-- No meta commentary
-- No language switching
-- No references to being an AI`;
+QUALITY BAR
+Sound like a real teacher thinking aloud: allow small fillers like “um”, “okay”, “right”, but keep them rare (max 6 total).
+Be specific, accurate, and clear.`;
 
                 const res = await fetch(CONFIG.MOONSHOT_URL, {
                     method: "POST",
