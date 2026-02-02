@@ -579,7 +579,28 @@ Be specific, accurate, and clear.`;
                     timestamp: Date.now()
                 });
 
+                this.logLatency(`Sent: ${text.substring(0, 20)}...`);
+                this.logLatency(`Sent: ${text.substring(0, 20)}...`);
                 this.log(`Sent: ${text.substring(0, 50)}...`, "info");
+            },
+
+            logLatency(msg) {
+                const now = new Date();
+                const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+                const logEl = document.getElementById('latency-log');
+                const entry = document.createElement('span');
+                entry.innerText = `[${time}] ${msg}`;
+                entry.className = "opacity-80 border-r border-white/20 pr-2 mr-2";
+
+                // Prepend to show latest first? Or Append? User said "monitor latency... the moment it sends". 
+                // Horizontal scroll usually implies append if reading left-to-right.
+                logEl.appendChild(entry);
+
+                // Auto scroll to end
+                logEl.scrollLeft = logEl.scrollWidth;
+
+                // Limit items
+                if (logEl.children.length > 50) logEl.firstChild.remove();
             },
 
             updateUI(state) {
@@ -651,6 +672,22 @@ Be specific, accurate, and clear.`;
                 }
             },
 
+            logLatency(msg) {
+                const now = new Date();
+                const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+                const logEl = document.getElementById('latency-log');
+                if (!logEl) return;
+
+                const entry = document.createElement('span');
+                entry.innerText = `[${time}] ${msg}`;
+                entry.className = "opacity-80 border-r border-white/20 pr-2 mr-2";
+
+                logEl.appendChild(entry);
+                logEl.scrollLeft = logEl.scrollWidth;
+                if (logEl.children.length > 50) logEl.firstChild.remove();
+            },
+
+
             log(msg, type) {
                 const div = document.createElement('div');
                 div.className = `p-3 rounded-xl text-xs font-medium animate-slide-up ${type === 'success' ? 'bg-green-50 text-green-700' :
@@ -666,6 +703,10 @@ Be specific, accurate, and clear.`;
 
         Generator.init();
     </script>
+    <!-- Latency Monitor Log -->
+    <div id="latency-log"
+        class="fixed bottom-0 left-0 w-full h-auto max-h-[24px] bg-black/90 text-green-400 text-[8px] font-mono leading-none flex items-center gap-4 px-2 overflow-x-auto whitespace-nowrap z-[9999] pointer-events-none">
+    </div>
 </body>
 
 </html>
