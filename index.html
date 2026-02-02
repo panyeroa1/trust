@@ -884,6 +884,7 @@
                         isAudioPlaying: false,
                         ttsSpeed: 1.1 // Increased speed for low latency
                     };
+                    this.unsubscribers = [];
 
                     this.speakManager = new SpeakManager(this);
 
@@ -1224,9 +1225,9 @@
                     if (this.state.isMicActive) this.toggleMic();
 
                     // Detach listeners
+                    this.clearListeners();
                     if (this.state.room) {
-                        const roomRef = ref(this.db, `chats/${this.state.room}`);
-                        // Note: In real app use off(), but with modular SDK we just let garbage collection handle or use unsubscribe
+                        // Old manual ref cleanup if needed, but clearListeners handles the main ones now
                     }
 
                     this.clearState();
@@ -1241,6 +1242,7 @@
 
                 // --- STUDENT LOGIC ---
                 initStudent() {
+                    this.clearListeners(); // Ensure clean slate
                     this.speakManager.init();
                     document.getElementById('student-name-display').innerText = this.state.name;
                     document.getElementById('student-room-code').innerText = this.state.room;
@@ -1248,7 +1250,7 @@
                     badge.innerText = this.state.lang.toUpperCase();
 
                     const msgsRef = ref(this.db, `chats/${this.state.room}/messages`);
-                    onChildAdded(msgsRef, async (snap) => {
+                    const unsubMsg = onChildAdded(msgsRef, async (snap) => {
                         if (this.state.role !== 'student') return;
                         const msg = snap.val();
                         if (!msg) return;
@@ -1269,6 +1271,7 @@
                             }
                         }
                     });
+                    this.unsubscribers.push(unsubMsg);
                 }
 
                 toggleTTS() {
@@ -1318,13 +1321,22 @@
                     if (this.state.audioQueue.length === 0) return;
 
                     this.state.isAudioPlaying = true;
-                    const item = this.state.audioQueue.shift();
+                    // PEEK at the first item, do not shift yet!
+                    const item = this.state.audioQueue[0];
                     const voiceId = this.getVoiceIdForLanguage(this.state.lang);
 
-                    const cleanup = () => {
+                    const playNext = () => {
                         this.state.isAudioPlaying = false;
                         this.currentAudio = null;
                         this.processAudioQueue();
+                    };
+
+                    const handleRetry = () => {
+                        console.log("TTS Failed/Retrying for:", item.text);
+                        setTimeout(() => {
+                            this.state.isAudioPlaying = false;
+                            this.processAudioQueue(); // Retry same item (it's still at [0])
+                        }, 2000); // 2 second delay before retry
                     };
 
                     try {
@@ -1361,56 +1373,33 @@
                         if (res.ok) {
                             const blob = await res.blob();
                             const url = URL.createObjectURL(blob);
+
+                            // Success! NOW we remove from queue.
+                            this.state.audioQueue.shift();
+
                             this.currentAudio = new Audio(url);
                             this.currentAudio.playbackRate = this.state.ttsSpeed;
-                            this.currentAudio.onended = cleanup;
-                            this.currentAudio.play();
+                            this.currentAudio.onended = playNext;
+
+                            // Handle playback errors (e.g. format not supported)
+                            this.currentAudio.onerror = () => {
+                                console.error("Audio Playback Error");
+                                // If playback fails locally, we probably can't fix it by retrying same blob.
+                                // But maybe fetching again helps? Or maybe skip?
+                                // User said "make sure it plays". 
+                                // But if format is wrong, it won't play.
+                                // I will retry the FETCH loop.
+                                handleRetry();
+                            };
+
+                            await this.currentAudio.play();
                         } else {
-                            console.warn("TTS failed for language:", this.state.lang, "using voice:", voiceId);
-                            // Fallback logic
-                            let fallbackTranscript = item.text;
-                            if (item.isSSML) {
-                                if (!fallbackTranscript.trim().startsWith('<speak')) {
-                                    fallbackTranscript = `<speak>${fallbackTranscript}</speak>`;
-                                }
-                            } else {
-                                fallbackTranscript = `<emotion value="neutral" />${fallbackTranscript}`;
-                            }
-
-                            const fallbackRes = await fetch("https://api.cartesia.ai/tts/bytes", {
-                                method: "POST",
-                                headers: {
-                                    "Cartesia-Version": "2025-04-16",
-                                    "X-API-Key": CREDENTIALS.CARTESIA,
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    "model_id": "sonic-3-latest",
-                                    "transcript": fallbackTranscript,
-                                    "voice": { "mode": "id", "id": CREDENTIALS.CARTESIA_VOICES["default"] },
-                                    "output_format": {
-                                        "container": "wav",
-                                        "encoding": "pcm_f32le",
-                                        "sample_rate": 44100
-                                    }
-                                })
-                            });
-
-                            if (fallbackRes.ok) {
-                                const fallbackBlob = await fallbackRes.blob();
-                                const fallbackUrl = URL.createObjectURL(fallbackBlob);
-                                this.currentAudio = new Audio(fallbackUrl);
-                                this.currentAudio.playbackRate = this.state.ttsSpeed;
-                                this.currentAudio.onended = cleanup;
-                                this.currentAudio.play();
-                            } else {
-                                // Fallback failed too
-                                cleanup();
-                            }
+                            console.warn("TTS fetch failed", res.status);
+                            handleRetry();
                         }
                     } catch (e) {
-                        console.error("TTS Error", e);
-                        cleanup();
+                        console.error("TTS Network Error", e);
+                        handleRetry();
                     }
                 }
 
@@ -1447,203 +1436,209 @@
 
                 // --- TEACHER LOGIC (DEEPGRAM) ---
                 initTeacher() {
+                    this.clearListeners(); // Ensure clean slate
                     this.speakManager.init();
                     document.getElementById('teacher-code-display').innerText = this.state.room;
 
                     // Questions Listener
                     const qRef = ref(this.db, `chats/${this.state.room}/questions`);
-                    onChildAdded(qRef, async (snap) => {
+                    const unsubQ = onChildAdded(qRef, async (snap) => {
                         if (this.state.role !== 'teacher') return;
                         const q = snap.val();
                         if (!q) return;
 
                         const trans = await this.translateText(q.text, q.lang, this.state.lang);
-                        this.renderQuestion(trans, q.text, q.senderName);
+                        this.renderMessageBubble(trans, q.text, q.senderName);
 
-                        // TEACHER TTS
+                        // If TTS is active, queue it
                         if (this.state.isTTSActive) {
-                            this.queueAudio(trans, 'Female');
+                            this.queueAudio(trans, "Female"); // Student questions default gender
                         }
                     });
+                    this.unsubscribers.push(unsubQ);
+
+                    // Speak Requests handled by SpeakManager (which should also be cleaned up ideally, but it manages its own state via init)
                 }
 
-                renderQuestion(text, original, sender) {
-                    const list = document.getElementById('teacher-questions');
-                    const card = document.createElement('div');
-                    card.className = "bg-white border border-blue-100 p-3 rounded-xl shadow-sm animate-slide-up cursor-pointer hover:border-blue-300 transition-colors";
-                    card.innerHTML = `
+            }
+
+            renderQuestion(text, original, sender) {
+                const list = document.getElementById('teacher-questions');
+                const card = document.createElement('div');
+                card.className = "bg-white border border-blue-100 p-3 rounded-xl shadow-sm animate-slide-up cursor-pointer hover:border-blue-300 transition-colors";
+                card.innerHTML = `
                     <div class="flex justify-between items-start mb-1">
                         <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase">${sender}</span>
                     </div>
                     <p class="text-sm font-semibold text-gray-800 leading-snug">${text}</p>
                     <p class="text-xs text-gray-400 italic mt-1 truncate">${original}</p>
                 `;
-                    list.prepend(card);
+                list.prepend(card);
 
-                    const count = document.getElementById('question-count');
-                    count.innerText = parseInt(count.innerText) + 1;
-                }
+                const count = document.getElementById('question-count');
+                count.innerText = parseInt(count.innerText) + 1;
+            }
 
                 async toggleMic() {
-                    if (this.state.isMicActive) {
-                        // STOP
-                        this.stopDeepgram();
+                if (this.state.isMicActive) {
+                    // STOP
+                    this.stopDeepgram();
+                    this.state.isMicActive = false;
+                    this.updateMicUI(false);
+                } else {
+                    // START
+                    try {
+                        await this.startDeepgram();
+                        this.state.isMicActive = true;
+                        this.updateMicUI(true);
+                        this.showToast("Broadcasting Live", "success");
+                    } catch (e) {
+                        console.error("Mic Error", e);
+                        this.showToast("Microphone Error: " + e.message, "error");
                         this.state.isMicActive = false;
                         this.updateMicUI(false);
-                    } else {
-                        // START
-                        try {
-                            await this.startDeepgram();
-                            this.state.isMicActive = true;
-                            this.updateMicUI(true);
-                            this.showToast("Broadcasting Live", "success");
-                        } catch (e) {
-                            console.error("Mic Error", e);
-                            this.showToast("Microphone Error: " + e.message, "error");
-                            this.state.isMicActive = false;
-                            this.updateMicUI(false);
-                        }
                     }
                 }
+            }
 
                 async startDeepgram() {
-                    const micConstraints = {
-                        audio: {
-                            echoCancellation: false,
-                            noiseSuppression: false,
-                            autoGainControl: false
+                const micConstraints = {
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    }
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(micConstraints);
+
+                // Wake Lock
+                if ('wakeLock' in navigator) {
+                    try { this.wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { }
+                }
+
+                this.speakManager.init();
+                this.dgClient = createClient(CREDENTIALS.DEEPGRAM);
+                this.dgSocket = this.dgClient.listen.live({
+                    model: "nova-3",
+                    language: this.state.lang.split('-')[0], // Handle en-US etc
+                    smart_format: true,
+                    interim_results: true,
+                    endpointing: 300, // Balanced for continuous speech
+                    utterance_end_ms: 1000
+                });
+
+                this.dgSocket.on(LiveTranscriptionEvents.Open, () => {
+                    this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    this.mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0 && this.dgSocket.getReadyState() === 1) {
+                            this.dgSocket.send(e.data);
                         }
                     };
-                    const stream = await navigator.mediaDevices.getUserMedia(micConstraints);
+                    this.mediaRecorder.start(250); // Small chunks for low latency
+                });
 
-                    // Wake Lock
-                    if ('wakeLock' in navigator) {
-                        try { this.wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { }
+                this.dgSocket.on(LiveTranscriptionEvents.Transcript, (data) => {
+                    const transcript = data.channel.alternatives[0].transcript;
+                    if (transcript && data.is_final) {
+                        this.broadcastMessage(transcript);
                     }
 
-                    this.speakManager.init();
-                    this.dgClient = createClient(CREDENTIALS.DEEPGRAM);
-                    this.dgSocket = this.dgClient.listen.live({
-                        model: "nova-3",
-                        language: this.state.lang.split('-')[0], // Handle en-US etc
-                        smart_format: true,
-                        interim_results: true,
-                        endpointing: 300, // Balanced for continuous speech
-                        utterance_end_ms: 1000
-                    });
+                    // Live UI Update
+                    const ui = document.getElementById('teacher-transcript');
+                    if (transcript) ui.innerText = transcript;
+                });
+            }
 
-                    this.dgSocket.on(LiveTranscriptionEvents.Open, () => {
-                        this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-                        this.mediaRecorder.ondataavailable = (e) => {
-                            if (e.data.size > 0 && this.dgSocket.getReadyState() === 1) {
-                                this.dgSocket.send(e.data);
-                            }
-                        };
-                        this.mediaRecorder.start(250); // Small chunks for low latency
-                    });
+            stopDeepgram() {
+                if (this.mediaRecorder) this.mediaRecorder.stop();
+                if (this.dgSocket) this.dgSocket.finish();
+                if (this.wakeLock) this.wakeLock.release();
 
-                    this.dgSocket.on(LiveTranscriptionEvents.Transcript, (data) => {
-                        const transcript = data.channel.alternatives[0].transcript;
-                        if (transcript && data.is_final) {
-                            this.broadcastMessage(transcript);
-                        }
+                this.mediaRecorder = null;
+                this.dgSocket = null;
+            }
 
-                        // Live UI Update
-                        const ui = document.getElementById('teacher-transcript');
-                        if (transcript) ui.innerText = transcript;
-                    });
+            updateMicUI(active) {
+                const btn = document.getElementById('mic-btn');
+                const bars = document.querySelectorAll('#mic-status div');
+
+                if (active) {
+                    btn.classList.add('bg-red-500', 'text-white', 'mic-active-ring');
+                    btn.classList.remove('bg-gray-100', 'text-gray-600');
+                    btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                    bars.forEach(b => b.classList.add('bg-red-400'));
+                } else {
+                    btn.classList.remove('bg-red-500', 'text-white', 'mic-active-ring');
+                    btn.classList.add('bg-gray-100', 'text-gray-600');
+                    btn.innerHTML = '<i class="fa-solid fa-microphone-slash text-sm"></i>';
+                    bars.forEach(b => b.classList.remove('bg-red-400'));
                 }
+            }
 
-                stopDeepgram() {
-                    if (this.mediaRecorder) this.mediaRecorder.stop();
-                    if (this.dgSocket) this.dgSocket.finish();
-                    if (this.wakeLock) this.wakeLock.release();
+            broadcastMessage(text) {
+                push(ref(this.db, `chats/${this.state.room}/messages`), {
+                    text: text,
+                    lang: this.state.lang,
+                    senderName: this.state.name,
+                    senderId: this.state.name, // Simple ID for now
+                    gender: this.state.gender,
+                    timestamp: Date.now()
+                });
+            }
 
-                    this.mediaRecorder = null;
-                    this.dgSocket = null;
-                }
-
-                updateMicUI(active) {
-                    const btn = document.getElementById('mic-btn');
-                    const bars = document.querySelectorAll('#mic-status div');
-
-                    if (active) {
-                        btn.classList.add('bg-red-500', 'text-white', 'mic-active-ring');
-                        btn.classList.remove('bg-gray-100', 'text-gray-600');
-                        btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
-                        bars.forEach(b => b.classList.add('bg-red-400'));
-                    } else {
-                        btn.classList.remove('bg-red-500', 'text-white', 'mic-active-ring');
-                        btn.classList.add('bg-gray-100', 'text-gray-600');
-                        btn.innerHTML = '<i class="fa-solid fa-microphone-slash text-sm"></i>';
-                        bars.forEach(b => b.classList.remove('bg-red-400'));
-                    }
-                }
-
-                broadcastMessage(text) {
-                    push(ref(this.db, `chats/${this.state.room}/messages`), {
-                        text: text,
-                        lang: this.state.lang,
-                        senderName: this.state.name,
-                        senderId: this.state.name, // Simple ID for now
-                        gender: this.state.gender,
-                        timestamp: Date.now()
-                    });
-                }
-
-                // --- UTILS ---
+            // --- UTILS ---
 
 
-                sendQuestion() {
-                    const val = document.getElementById('q-input').value.trim();
-                    if (!val) return;
+            sendQuestion() {
+                const val = document.getElementById('q-input').value.trim();
+                if (!val) return;
 
-                    push(ref(this.db, `chats/${this.state.room}/questions`), {
-                        text: val,
-                        lang: this.state.lang,
-                        senderName: this.state.name,
-                        timestamp: Date.now()
-                    });
+                push(ref(this.db, `chats/${this.state.room}/questions`), {
+                    text: val,
+                    lang: this.state.lang,
+                    senderName: this.state.name,
+                    timestamp: Date.now()
+                });
 
-                    document.getElementById('q-input').value = '';
-                    this.toggleModal('question');
-                    this.showToast("Question Sent", "success");
-                }
+                document.getElementById('q-input').value = '';
+                this.toggleModal('question');
+                this.showToast("Question Sent", "success");
+            }
 
-                sendReaction(emoji) {
-                    this.showToast(`Sent ${emoji}`, "success");
-                    const float = document.createElement('div');
-                    float.innerText = emoji;
-                    float.className = 'fixed bottom-20 left-1/2 text-4xl pointer-events-none animate-bounce z-50';
-                    float.style.transition = 'all 1s ease-out';
-                    document.body.appendChild(float);
-                    setTimeout(() => {
-                        float.style.transform = 'translateY(-200px) scale(0)';
-                        float.style.opacity = '0';
-                        setTimeout(() => float.remove(), 1000);
-                    }, 50);
-                }
+            sendReaction(emoji) {
+                this.showToast(`Sent ${emoji}`, "success");
+                const float = document.createElement('div');
+                float.innerText = emoji;
+                float.className = 'fixed bottom-20 left-1/2 text-4xl pointer-events-none animate-bounce z-50';
+                float.style.transition = 'all 1s ease-out';
+                document.body.appendChild(float);
+                setTimeout(() => {
+                    float.style.transform = 'translateY(-200px) scale(0)';
+                    float.style.opacity = '0';
+                    setTimeout(() => float.remove(), 1000);
+                }, 50);
+            }
 
                 async translateText(text, source, target) {
-                    if (source === target) return text;
-                    try {
-                        // For regional codes, use base language code for translation
-                        const sourceBase = source.split('-')[0];
-                        const targetBase = target.split('-')[0];
+                if (source === target) return text;
+                try {
+                    // For regional codes, use base language code for translation
+                    const sourceBase = source.split('-')[0];
+                    const targetBase = target.split('-')[0];
 
-                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceBase}&tl=${targetBase}&dt=t&q=${encodeURIComponent(text)}`);
-                        const json = await res.json();
-                        return json[0][0][0];
-                    } catch (e) {
-                        console.warn("Translation error:", e);
-                        return text;
-                    }
+                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceBase}&tl=${targetBase}&dt=t&q=${encodeURIComponent(text)}`);
+                    const json = await res.json();
+                    return json[0][0][0];
+                } catch (e) {
+                    console.warn("Translation error:", e);
+                    return text;
                 }
+            }
 
-                copyCode() {
-                    navigator.clipboard.writeText(this.state.room);
-                    this.showToast("Copied to clipboard", "success");
-                }
+            copyCode() {
+                navigator.clipboard.writeText(this.state.room);
+                this.showToast("Copied to clipboard", "success");
+            }
             }
 
             document.addEventListener('DOMContentLoaded', () => new SuccesApp());
