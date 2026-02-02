@@ -881,7 +881,7 @@
                         gender: 'Male',
                         lang: 'en',
                         isMicActive: false,
-                        isTTSActive: false,
+                        isTTSActive: true, // Enable TTS by default for students
                         audioQueue: [],
                         isAudioPlaying: false,
                         ttsSpeed: 1.1 // Increased speed for low latency
@@ -918,7 +918,7 @@
                 }
 
                 bindAll() {
-                    ['handleLogin', 'handleTeacherLogin', 'toggleTeacherMode', 'startSession', 'logout', 'toggleMic', 'sendQuestion', 'toggleModal', 'sendReaction', 'toggleTTS', 'installApp', 'dismissBanner'].forEach(m => this[m] = this[m].bind(this));
+                    ['handleLogin', 'handleTeacherLogin', 'toggleTeacherMode', 'startSession', 'logout', 'toggleMic', 'sendQuestion', 'toggleModal', 'sendReaction', 'toggleTTS', 'installApp', 'dismissBanner', 'toggleTab'].forEach(m => this[m] = this[m].bind(this));
                 }
 
                 init() {
@@ -1222,6 +1222,7 @@
                         // Old manual ref cleanup if needed, but clearListeners handles the main ones now
                     }
 
+                    this.clearUI();
                     this.clearState();
                     this.state.role = null;
                     this.state.room = '';
@@ -1237,14 +1238,84 @@
                     this.unsubscribers = [];
                 }
 
+                clearUI() {
+                    // Clear student stream
+                    const studentStream = document.getElementById('student-stream');
+                    if (studentStream) {
+                        studentStream.innerHTML = `
+                            <div class="text-center py-10 opacity-60">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-xl">
+                                    <i class="fa-solid fa-ear-listen"></i>
+                                </div>
+                                <p class="text-sm font-medium text-gray-500">Connected to <span class="font-mono text-gray-700 font-bold" id="student-room-code">...</span></p>
+                                <p class="text-xs text-gray-400 mt-1">Listening for speech...</p>
+                            </div>
+                        `;
+                    }
+
+                    // Clear teacher transcript
+                    const teacherTranscript = document.getElementById('teacher-transcript');
+                    if (teacherTranscript) {
+                        teacherTranscript.innerText = 'Tap the microphone to start broadcasting...';
+                    }
+
+                    // Clear teacher questions
+                    const teacherQuestions = document.getElementById('teacher-questions');
+                    if (teacherQuestions) {
+                        teacherQuestions.innerHTML = `
+                            <div class="text-center py-8 opacity-40">
+                                <i class="fa-solid fa-hand text-2xl mb-2"></i>
+                                <p class="text-[11px] font-bold uppercase tracking-tight">No Active Hands</p>
+                            </div>
+                        `;
+                    }
+
+                    // Clear speak requests
+                    const teacherSpeakRequests = document.getElementById('teacher-speak-requests');
+                    if (teacherSpeakRequests) {
+                        teacherSpeakRequests.innerHTML = `
+                            <div class="text-center py-8 opacity-40">
+                                <i class="fa-solid fa-microphone-lines text-2xl mb-2"></i>
+                                <p class="text-[11px] font-bold uppercase tracking-tight">No Speak Requests</p>
+                            </div>
+                        `;
+                    }
+
+                    // Reset counts
+                    const questionCount = document.getElementById('question-count');
+                    const speakRequestCount = document.getElementById('speak-request-count');
+                    if (questionCount) questionCount.innerText = '0';
+                    if (speakRequestCount) speakRequestCount.innerText = '0';
+
+                    // Clear history content
+                    const historyContent = document.getElementById('history-content');
+                    if (historyContent) {
+                        historyContent.innerHTML = `
+                            <div class="text-center py-20 opacity-30">
+                                <i class="fa-solid fa-hourglass-start text-4xl mb-4"></i>
+                                <p class="text-sm font-bold">No history available yet</p>
+                            </div>
+                        `;
+                    }
+                }
+
                 // --- STUDENT LOGIC ---
                 initStudent() {
                     this.clearListeners(); // Ensure clean slate
+                    this.clearUI(); // Clear previous room data
                     this.speakManager.init();
                     document.getElementById('student-name-display').innerText = this.state.name;
                     document.getElementById('student-room-code').innerText = this.state.room;
                     const badge = document.getElementById('student-lang-badge');
                     badge.innerText = this.state.lang.toUpperCase();
+
+                    // Set TTS UI to enabled state by default
+                    const sIcon = document.getElementById('tts-icon');
+                    const sBtn = document.getElementById('tts-btn');
+                    if (sIcon && sBtn && this.state.isTTSActive) {
+                        sIcon.className = "fa-solid fa-volume-high";
+                        sBtn.classList.add('text-blue-500');
+                    }
 
                     const msgsRef = ref(this.db, `chats/${this.state.room}/messages`);
                     const unsubMsg = onChildAdded(msgsRef, async (snap) => {
@@ -1260,11 +1331,22 @@
 
                         // TTS Queue - ONLY FOR STUDENTS HEARING TEACHER
                         if (this.state.isTTSActive && msg.senderId !== this.state.name) {
-                            if (msg.ssml && msg.lang === this.state.lang) {
-                                // If we have SSML and language matches, use it directly
-                                this.queueAudio(msg.ssml, msg.gender || 'Female', { isSSML: true });
+                            let voiceId = null;
+                            
+                            // Use teacher's cloned voice if available
+                            if (msg.voiceId) {
+                                voiceId = msg.voiceId;
                             } else {
-                                this.queueAudio(translated, msg.gender || 'Female');
+                                // Fallback to language-specific voice
+                                voiceId = this.getVoiceIdForLanguage(this.state.lang);
+                            }
+                            
+                            if (msg.ssml && msg.lang === this.state.lang) {
+                                // If we have SSML and language matches, use it directly with cloned voice
+                                this.queueAudio(msg.ssml, msg.gender || 'Female', { isSSML: true, voiceId });
+                            } else {
+                                // Use translated text with the appropriate voice
+                                this.queueAudio(translated, msg.gender || 'Female', { voiceId });
                             }
                         }
                     });
@@ -1320,7 +1402,9 @@
                     this.state.isAudioPlaying = true;
                     // PEEK at the first item, do not shift yet!
                     const item = this.state.audioQueue[0];
-                    const voiceId = this.getVoiceIdForLanguage(this.state.lang);
+                    
+                    // Use custom voice ID if provided, otherwise fallback to language-specific voice
+                    const voiceId = item.voiceId || this.getVoiceIdForLanguage(this.state.lang);
 
                     const playNext = () => {
                         this.state.isAudioPlaying = false;
@@ -1434,6 +1518,7 @@
                 // --- TEACHER LOGIC (DEEPGRAM) ---
                 initTeacher() {
                     this.clearListeners(); // Ensure clean slate
+                    this.clearUI(); // Clear previous room data
                     this.speakManager.init();
                     document.getElementById('teacher-code-display').innerText = this.state.room;
 
@@ -1444,8 +1529,16 @@
                         const q = snap.val();
                         if (!q) return;
 
+                        console.log('Received question:', q); // Debug log
+
                         const trans = await this.translateText(q.text, q.lang, this.state.lang);
-                        this.renderMessageBubble(trans, q.text, q.senderName);
+                        this.renderQuestion(trans, q.text, q.senderName);
+
+                        // Update question count
+                        const count = document.getElementById('question-count');
+                        if (count) {
+                            count.innerText = parseInt(count.innerText || '0') + 1;
+                        }
 
                         // If TTS is active, queue it
                         if (this.state.isTTSActive) {
@@ -1458,12 +1551,20 @@
                 }
 
                 renderQuestion(text, original, sender) {
+                    console.log('Rendering question:', { text, original, sender }); // Debug log
+                    
                     const list = document.getElementById('teacher-questions');
+                    if (!list) {
+                        console.error('teacher-questions element not found'); // Debug log
+                        return;
+                    }
+                    
                     const card = document.createElement('div');
                     card.className = "bg-white border border-blue-100 p-3 rounded-xl shadow-sm animate-slide-up cursor-pointer hover:border-blue-300 transition-colors";
                     card.innerHTML = `
                     <div class="flex justify-between items-start mb-1">
                         <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase">${sender}</span>
+                        <span class="text-[8px] text-gray-400">${new Date().toLocaleTimeString()}</span>
                     </div>
                     <p class="text-sm font-semibold text-gray-800 leading-snug">${text}</p>
                     <p class="text-xs text-gray-400 italic mt-1 truncate">${original}</p>
@@ -1471,7 +1572,11 @@
                     list.prepend(card);
 
                     const count = document.getElementById('question-count');
-                    count.innerText = parseInt(count.innerText || '0') + 1;
+                    if (count) {
+                        count.innerText = parseInt(count.innerText || '0') + 1;
+                    } else {
+                        console.error('question-count element not found'); // Debug log
+                    }
                 }
 
                 async toggleMic() {
@@ -1591,16 +1696,22 @@
                     const val = document.getElementById('q-input').value.trim();
                     if (!val) return;
 
+                    console.log('Sending question:', val); // Debug log
+
                     push(ref(this.db, `chats/${this.state.room}/questions`), {
                         text: val,
                         lang: this.state.lang,
                         senderName: this.state.name,
                         timestamp: Date.now()
+                    }).then(() => {
+                        console.log('Question sent successfully'); // Debug log
+                        document.getElementById('q-input').value = '';
+                        this.toggleModal('question');
+                        this.showToast("Question Sent", "success");
+                    }).catch((error) => {
+                        console.error('Failed to send question:', error);
+                        this.showToast("Failed to send question", "error");
                     });
-
-                    document.getElementById('q-input').value = '';
-                    this.toggleModal('question');
-                    this.showToast("Question Sent", "success");
                 }
 
                 sendReaction(emoji) {
@@ -1636,6 +1747,25 @@
                 copyCode() {
                     navigator.clipboard.writeText(this.state.room);
                     this.showToast("Copied to clipboard", "success");
+                }
+
+                toggleTab(tab) {
+                    const questionsPanel = document.getElementById('panel-questions');
+                    const speakPanel = document.getElementById('panel-speak');
+                    const questionsBtn = document.querySelector('[onclick="App.toggleTab(\'questions\')"]');
+                    const speakBtn = document.querySelector('[onclick="App.toggleTab(\'speak\')"]');
+
+                    if (tab === 'questions') {
+                        questionsPanel.classList.remove('hidden');
+                        speakPanel.classList.add('hidden');
+                        questionsBtn.classList.add('text-blue-600');
+                        speakBtn.classList.remove('text-blue-600');
+                    } else if (tab === 'speak') {
+                        questionsPanel.classList.add('hidden');
+                        speakPanel.classList.remove('hidden');
+                        questionsBtn.classList.remove('text-blue-600');
+                        speakBtn.classList.add('text-blue-600');
+                    }
                 }
             }
 

@@ -56,12 +56,33 @@ export class SpeakManager {
             if (!data) return;
 
             Object.entries(data).forEach(([key, req]) => {
-                if (req.name === this.app.state.name && req.status === 'approved') {
-                    this.onApproved();
-                    // Optional: remove request or mark as handled
+                if (req.name === this.app.state.name) {
+                    if (req.status === 'approved') {
+                        this.onApproved();
+                        // Clean up approved request
+                        this.removeRequest(key);
+                    } else if (req.status === 'denied') {
+                        this.onDenied();
+                        // Clean up denied request
+                        this.removeRequest(key);
+                    }
                 }
             });
         });
+    }
+
+    async removeRequest(requestId) {
+        try {
+            const { ref, remove } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
+            await remove(ref(this.db, `${this.requestsRef}/${requestId}`));
+        } catch (e) {
+            console.error("Failed to remove request:", e);
+        }
+    }
+
+    onDenied() {
+        this.app.showToast("Request denied by teacher", "warning");
+        this.resetRequestButton();
     }
 
     onApproved() {
@@ -71,8 +92,24 @@ export class SpeakManager {
             btn.classList.remove('bg-gradient-to-br', 'from-blue-500', 'to-indigo-600');
             btn.classList.add('bg-green-500', 'animate-pulse');
             btn.innerHTML = '<i class="fa-solid fa-microphone-lines text-lg"></i>';
-            // Here you would trigger the microphone or existing toggleMic logic
-            // this.app.toggleMic(); 
+            // Enable microphone for student
+            btn.onclick = () => {
+                this.app.toggleMic();
+                // Reset button after stopping mic
+                setTimeout(() => {
+                    this.resetRequestButton();
+                }, 1000);
+            };
+        }
+    }
+
+    resetRequestButton() {
+        const btn = document.getElementById('speak-request-btn');
+        if (btn) {
+            btn.classList.remove('bg-green-500', 'animate-pulse');
+            btn.classList.add('bg-gradient-to-br', 'from-blue-500', 'to-indigo-600');
+            btn.innerHTML = '<i class="fa-solid fa-microphone text-lg"></i>';
+            btn.onclick = () => this.requestToSpeak();
         }
     }
 

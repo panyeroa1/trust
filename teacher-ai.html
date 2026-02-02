@@ -180,6 +180,10 @@
                 <h1 class="font-black text-gray-900 tracking-tight text-sm uppercase">AI Teacher</h1>
             </div>
             <div class="flex items-center gap-2 md:gap-3">
+                <button onclick="VoiceClone.toggleModal()" title="Clone Your Voice"
+                    class="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all active:scale-95">
+                    <i class="fa-solid fa-clone text-sm"></i>
+                </button>
                 <button onclick="Generator.copyRoomId()" title="Copy Room ID"
                     class="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all active:scale-95">
                     <i class="fa-regular fa-copy text-sm"></i>
@@ -308,6 +312,79 @@
         </div>
     </main>
 
+    <!-- Voice Clone Modal -->
+    <div id="voice-clone-modal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="VoiceClone.toggleModal()"></div>
+        <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto">
+            <div class="glass-apple rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-black text-gray-900">Clone Your Voice</h3>
+                    <button onclick="VoiceClone.toggleModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all">
+                        <i class="fa-solid fa-times text-sm"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <p class="text-sm text-gray-600">Record or upload a 10-second audio sample to create your AI voice clone.</p>
+                    
+                    <!-- Voice Status -->
+                    <div id="voice-status" class="hidden p-3 rounded-lg text-sm font-medium">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-check-circle text-green-500"></i>
+                            <span>Voice clone ready!</span>
+                        </div>
+                    </div>
+
+                    <!-- Recording Option -->
+                    <div class="border border-gray-200 rounded-xl p-4">
+                        <h4 class="font-semibold text-gray-900 mb-3">Record Audio</h4>
+                        <div class="flex items-center gap-3">
+                            <button id="record-btn" onclick="VoiceClone.toggleRecording()" class="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-xl py-3 px-4 font-medium transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-microphone"></i>
+                                <span id="record-text">Start Recording</span>
+                            </button>
+                            <div id="record-timer" class="text-sm font-mono text-gray-600 hidden">00:00</div>
+                        </div>
+                        <div id="audio-visualizer" class="mt-3 h-12 bg-gray-100 rounded-lg flex items-center justify-center gap-1 hidden">
+                            <div class="w-1 bg-blue-500 rounded-full animate-pulse"></div>
+                            <div class="w-1 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
+                            <div class="w-1 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                            <div class="w-1 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.3s"></div>
+                            <div class="w-1 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Option -->
+                    <div class="border border-gray-200 rounded-xl p-4">
+                        <h4 class="font-semibold text-gray-900 mb-3">Upload Audio File</h4>
+                        <input type="file" id="audio-upload" accept="audio/*" class="hidden" onchange="VoiceClone.handleFileUpload(event)">
+                        <button onclick="document.getElementById('audio-upload').click()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl py-3 px-4 font-medium transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-upload"></i>
+                            <span>Choose Audio File</span>
+                        </button>
+                        <div id="upload-filename" class="mt-2 text-sm text-gray-600 hidden"></div>
+                    </div>
+
+                    <!-- Clone Button -->
+                    <button id="clone-btn" onclick="VoiceClone.cloneVoice()" disabled class="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl py-3 px-4 font-medium transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-clone"></i>
+                        <span>Create Voice Clone</span>
+                    </button>
+
+                    <!-- Progress -->
+                    <div id="clone-progress" class="hidden">
+                        <div class="flex items-center gap-3">
+                            <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <span id="progress-text" class="text-sm text-gray-600">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -315,6 +392,7 @@
         const CONFIG = {
             API_KEY: "sk-RPKYynytRIODIzGGm0GYgEF7RMgQqlee9upYDni5Yoi9gtLe",
             MOONSHOT_URL: "https://api.moonshot.ai/v1/chat/completions",
+            CARTESIA_API_KEY: "sk_car_mD3uos1Gw5t4vefQFdfBDX", // Cartesia API key
             FIREBASE: {
                 apiKey: "AIzaSyC93B2GgE3HzaWl5gW_mRroobQybaZNFJs",
                 authDomain: "macx-5feca.firebaseapp.com",
@@ -570,13 +648,17 @@ Be specific, accurate, and clear.`;
                 // Strip tags for display text
                 const text = ssml.replace(/<[^>]*>/g, '').trim();
 
+                // Check if user has a cloned voice
+                const userVoiceId = VoiceClone.getUserVoiceId();
+
                 push(ref(this.db, `chats/${this.session.room}/messages`), {
                     text: text,
                     ssml: ssml, // Send the full SSML for TTS
                     lang: this.session.lang,
                     senderName: "AI Teacher",
                     senderId: "ai-generator",
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    voiceId: userVoiceId || null // Include cloned voice ID if available
                 });
 
                 this.logLatency(`Sent: ${text.substring(0, 20)}...`);
@@ -700,6 +782,367 @@ Be specific, accurate, and clear.`;
                 container.prepend(div);
             }
         };
+
+        const VoiceClone = {
+            isRecording: false,
+            mediaRecorder: null,
+            audioChunks: [],
+            audioBlob: null,
+            recordingStartTime: null,
+            recordingTimer: null,
+            maxRecordingTime: 10000, // 10 seconds
+
+            async init() {
+                // Request microphone permissions
+                try {
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (error) {
+                    console.error('Microphone access denied:', error);
+                }
+            },
+
+            toggleModal() {
+                const modal = document.getElementById('voice-clone-modal');
+                modal.classList.toggle('hidden');
+                
+                // Check if user already has a voice clone when opening
+                if (!modal.classList.contains('hidden') && this.hasUserVoice()) {
+                    this.showVoiceStatus(true);
+                }
+            },
+
+            async toggleRecording() {
+                if (this.isRecording) {
+                    this.stopRecording();
+                } else {
+                    await this.startRecording();
+                }
+            },
+
+            async startRecording() {
+                try {
+                    console.log('Requesting microphone access...');
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 44100
+                        } 
+                    });
+                    
+                    console.log('Microphone access granted');
+                    console.log('Stream active:', stream.active);
+                    console.log('Audio tracks:', stream.getAudioTracks().length);
+
+                    this.mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/wav'
+                    });
+                    this.audioChunks = [];
+
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        console.log('Data available:', event.data.size, 'bytes');
+                        if (event.data.size > 0) {
+                            this.audioChunks.push(event.data);
+                        }
+                    };
+
+                    this.mediaRecorder.onstop = () => {
+                        console.log('Recording stopped');
+                        console.log('Audio chunks collected:', this.audioChunks.length);
+                        
+                        if (this.audioChunks.length > 0) {
+                            this.audioBlob = new Blob(this.audioChunks, { 
+                                type: this.mediaRecorder.mimeType || 'audio/webm' 
+                            });
+                            console.log('Audio blob created:', this.audioBlob.size, 'bytes');
+                            console.log('Audio blob type:', this.audioBlob.type);
+                            this.enableCloneButton();
+                        } else {
+                            console.error('No audio data recorded');
+                            alert('No audio data recorded. Please try again.');
+                        }
+                        
+                        this.updateRecordingUI(false);
+                        
+                        // Clean up stream
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    this.mediaRecorder.onerror = (event) => {
+                        console.error('MediaRecorder error:', event.error);
+                        alert('Recording error: ' + event.error.message);
+                        this.updateRecordingUI(false);
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    this.mediaRecorder.start(100); // Collect data every 100ms
+                    this.isRecording = true;
+                    this.recordingStartTime = Date.now();
+                    this.updateRecordingUI(true);
+                    this.startRecordingTimer();
+
+                    console.log('Recording started');
+
+                    // Auto-stop after 10 seconds
+                    setTimeout(() => {
+                        if (this.isRecording) {
+                            console.log('Auto-stopping recording after 10 seconds');
+                            this.stopRecording();
+                        }
+                    }, this.maxRecordingTime);
+
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    alert('Could not access microphone: ' + error.message + '. Please check permissions.');
+                    this.updateRecordingUI(false);
+                }
+            },
+
+            stopRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    this.isRecording = false;
+                    this.stopRecordingTimer();
+                }
+            },
+
+            startRecordingTimer() {
+                const timerEl = document.getElementById('record-timer');
+                const textEl = document.getElementById('record-text');
+                
+                timerEl.classList.remove('hidden');
+                textEl.textContent = 'Stop Recording';
+                
+                this.recordingTimer = setInterval(() => {
+                    const elapsed = Date.now() - this.recordingStartTime;
+                    const seconds = Math.floor(elapsed / 1000);
+                    const milliseconds = Math.floor((elapsed % 1000) / 100);
+                    timerEl.textContent = `00:${seconds.toString().padStart(2, '0')}.${milliseconds}`;
+                }, 100);
+            },
+
+            stopRecordingTimer() {
+                if (this.recordingTimer) {
+                    clearInterval(this.recordingTimer);
+                    this.recordingTimer = null;
+                }
+                document.getElementById('record-timer').classList.add('hidden');
+                document.getElementById('record-text').textContent = 'Start Recording';
+            },
+
+            updateRecordingUI(isRecording) {
+                const recordBtn = document.getElementById('record-btn');
+                const visualizer = document.getElementById('audio-visualizer');
+                
+                if (isRecording) {
+                    recordBtn.classList.replace('bg-red-500', 'bg-red-600');
+                    recordBtn.classList.replace('hover:bg-red-600', 'hover:bg-red-700');
+                    visualizer.classList.remove('hidden');
+                } else {
+                    recordBtn.classList.replace('bg-red-600', 'bg-red-500');
+                    recordBtn.classList.replace('hover:bg-red-700', 'hover:bg-red-600');
+                    visualizer.classList.add('hidden');
+                }
+            },
+
+            handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    // Check file size (max 10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('File size must be less than 10MB');
+                        return;
+                    }
+
+                    // Check file type
+                    if (!file.type.startsWith('audio/')) {
+                        alert('Please select an audio file');
+                        return;
+                    }
+
+                    this.audioBlob = file;
+                    document.getElementById('upload-filename').textContent = `Selected: ${file.name}`;
+                    document.getElementById('upload-filename').classList.remove('hidden');
+                    this.enableCloneButton();
+                }
+            },
+
+            enableCloneButton() {
+                document.getElementById('clone-btn').disabled = false;
+            },
+
+            async cloneVoice() {
+                if (!this.audioBlob) {
+                    alert('Please record or upload audio first');
+                    return;
+                }
+
+                const cloneBtn = document.getElementById('clone-btn');
+                const progressDiv = document.getElementById('clone-progress');
+                const progressBar = document.getElementById('progress-bar');
+                const progressText = document.getElementById('progress-text');
+
+                cloneBtn.disabled = true;
+                cloneBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Cloning...</span>';
+                progressDiv.classList.remove('hidden');
+
+                try {
+                    console.log('Starting voice cloning process...');
+                    console.log('Audio blob size:', this.audioBlob.size);
+                    console.log('Audio blob type:', this.audioBlob.type);
+                    
+                    // Update progress
+                    progressBar.style.width = '20%';
+                    progressText.textContent = '20%';
+
+                    // Convert blob to base64 (remove data URL prefix)
+                    const base64Audio = await this.blobToBase64(this.audioBlob);
+                    const cleanBase64 = base64Audio.split(',')[1]; // Remove "data:audio/wav;base64," prefix
+                    
+                    console.log('Base64 audio length:', cleanBase64.length);
+                    
+                    // Update progress
+                    progressBar.style.width = '40%';
+                    progressText.textContent = '40%';
+
+                    // Call Cartesia API to create voice clone
+                    const voiceId = await this.createCartesiaVoice(cleanBase64);
+                    
+                    console.log('Voice created with ID:', voiceId);
+                    
+                    // Update progress
+                    progressBar.style.width = '80%';
+                    progressText.textContent = '80%';
+
+                    // Store voice ID
+                    localStorage.setItem('user_voice_id', voiceId);
+                    localStorage.setItem('user_voice_created', Date.now().toString());
+                    
+                    console.log('Voice ID stored in localStorage');
+                    
+                    // Complete
+                    progressBar.style.width = '100%';
+                    progressText.textContent = '100%';
+
+                    // Show success
+                    setTimeout(() => {
+                        this.showVoiceStatus(true);
+                        cloneBtn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Voice Cloned!</span>';
+                        cloneBtn.classList.replace('bg-blue-500', 'bg-green-500');
+                        cloneBtn.classList.replace('hover:bg-blue-600', 'hover:bg-green-600');
+                        
+                        alert('Voice cloning successful! Your voice will now be used for translations.');
+                        
+                        setTimeout(() => {
+                            this.toggleModal();
+                        }, 2000);
+                    }, 500);
+
+                } catch (error) {
+                    console.error('Voice cloning failed:', error);
+                    console.error('Error details:', error.message);
+                    
+                    // Show detailed error
+                    alert(`Voice cloning failed: ${error.message}. Please check your API key and try again.`);
+                    
+                    cloneBtn.disabled = false;
+                    cloneBtn.innerHTML = '<i class="fa-solid fa-clone"></i> <span>Create Voice Clone</span>';
+                }
+
+                progressDiv.classList.add('hidden');
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+            },
+
+            async createCartesiaVoice(base64Audio) {
+                console.log('Calling Cartesia API...');
+                
+                // Use hardcoded API key from CONFIG
+                const apiKey = CONFIG.CARTESIA_API_KEY;
+                
+                console.log('API Key present:', !!apiKey);
+                console.log('API Key starts with sk_car:', apiKey?.startsWith('sk_car'));
+                
+                // Check if API key is properly set
+                if (!apiKey || !apiKey.startsWith('sk_car')) {
+                    throw new Error('Cartesia API key is not configured properly');
+                }
+
+                // Cartesia API endpoint for voice cloning
+                const response = await fetch('https://api.cartesia.ai/voices', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json',
+                        'Cartesia-Version': '2024-06-10'
+                    },
+                    body: JSON.stringify({
+                        name: `User Voice ${new Date().toISOString()}`,
+                        description: 'Cloned voice for AI Teacher translation',
+                        embedding: {
+                            data: base64Audio,
+                            format: 'webm' // Use webm format since we record in webm
+                        },
+                        language: Generator.session.lang || 'en'
+                    })
+                });
+
+                console.log('Cartesia API response status:', response.status);
+                console.log('Cartesia API response headers:', response.headers);
+
+                const responseText = await response.text();
+                console.log('Cartesia API response:', responseText);
+
+                if (!response.ok) {
+                    throw new Error(`Cartesia API error: ${response.status} ${response.statusText} - ${responseText}`);
+                }
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    throw new Error(`Failed to parse Cartesia response: ${parseError.message}. Response: ${responseText}`);
+                }
+
+                if (!data.id) {
+                    throw new Error(`No voice ID returned from Cartesia. Response: ${JSON.stringify(data)}`);
+                }
+
+                return data.id; // Return the voice ID
+            },
+
+            blobToBase64(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            },
+
+            showVoiceStatus(hasVoice) {
+                const statusEl = document.getElementById('voice-status');
+                if (hasVoice) {
+                    statusEl.classList.remove('hidden');
+                    statusEl.classList.add('bg-green-50', 'text-green-700');
+                } else {
+                    statusEl.classList.add('hidden');
+                }
+            },
+
+            getUserVoiceId() {
+                return localStorage.getItem('user_voice_id');
+            },
+
+            hasUserVoice() {
+                return !!this.getUserVoiceId();
+            }
+        };
+
+        // Initialize VoiceClone
+        VoiceClone.init();
+        window.VoiceClone = VoiceClone;
 
         Generator.init();
     </script>
